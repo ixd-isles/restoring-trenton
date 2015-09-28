@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-//this is sidebar input and some global variables. be careful messing with it.
-=======
->>>>>>> origin/master
 var config =
 {
 	city: "Trenton",
