@@ -20,6 +20,8 @@
 <script src="leaflet-label/leaflet.label-src.js"></script>
 <link rel="stylesheet" href="leaflet-label/leaflet.label.css" />
 
+<script src="css2pdf/xepOnline.jqPlugin.js"></script>
+
 <script src="leaflet-fullscreen/Control.FullScreen.js"></script>
 <link rel="stylesheet" href="leaflet-fullscreen/Control.FullScreen.css"></script>
 
@@ -44,7 +46,6 @@
 	</form></button>
 <button id="crimeFilters" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'">VIOLENT CRIME</button>
 <button id="ngbhdFilters" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'">NEIGHBORHOODS</button>
-<button id="legendContent" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'"></button>
 
 </head>
 <body>
@@ -73,10 +74,27 @@
 	color: #fff;
 }
 
-.info legend {
-	background-color:#ffffff;
-	line-height:18px;
-}
+		.info {
+			padding: 6px 8px;
+			font: 90% Open Sans;
+			background: white;
+			background: rgba(255,255,255,0.9);
+			box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			border-radius: 5px;
+		}
+
+		.legend {
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+		}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: 0.9;
+		}
 
 #sidebar{
 	font-family:"Courier New";
@@ -206,7 +224,7 @@ var config =
     additional_attrib : 'created by iana dikidjieva for <a href="http://www.restoringtrenton.org">restoring trenton</a>.<br>',
    	sql_url : 'http://restoringtrenton.cartodb.com/api/v2/sql?q=',
 	propertySearch_sidebar : "<fieldset><b>ADVANCED PROPERTY SEARCH</b><br>" +
-	"<span style='font-size:85%'>Instructions on constructing your queries can be found here.</span>" + 
+	"<span style='font-size:85%'><a style = 'text-decoration:none; color: #FF3300' href='http://www.restoringtrenton.org/#!using-the-interactive-map/c10s2'>Instructions on constructing your queries can be found here</a>.</span>" + 
 	"<table style='border:none'><tr><td style='border:none'>" +
 		"<p style='float:left; padding-left:7px; padding-right:7px;'><a id='btnQuery' class='btnQuery' href='javascript:mapSelection();'><img src='button/map_000000_32.png'></a><br>MAP</p>" +
 		"<p style='float:left; padding-left:7px; padding-right:7px; '><a id='btnTable' class='btnTable' href='javascript:makeTable();'><img src='button/table_444444_32.png'></a><br>TABLE</p>" +
@@ -259,8 +277,7 @@ var config =
 		"<p id='crimeQueryResult'></p>" +
 		"<hr>" +
 		"<b>YEARS</b>" +
-		"<br><input type='checkbox' class='year' id='2014' checked>2014</input>" +
-		"<br><input type='checkbox' class='year' id='2013'>2013</input>" +	
+		"<br><input type='checkbox' class='year' id='2013' checked>2013</input>" +	
 		"<br><input type='checkbox' class='year' id='2012'>2012</input>" +	
 		"<br><input type='checkbox' class='year' id='2011'>2011</input>" +
 		"<br><input type='checkbox' class='year' id='2010'>2010</input>" +	
@@ -278,7 +295,7 @@ var config =
 			"</form></fieldset>",
 		
 		ngbhdSidebar_content : 	
-					"<fieldset><b>NEIGHBORHOOD PROFILES</b><br>" +
+					"<fieldset><b>NEIGHBORHOOD CONDITIONS</b><br>" +
 					"<hr>" +
 					"<div id='ngbhd_query_form' style='font-family:Open Sans'>"+
 					"</div></fieldset>",
@@ -318,7 +335,6 @@ var ngbhdLayer = new L.geoJson();
 var crimeButtonOn = 0;
 var ngbhdButtonOn = 0;
 var crimeCounter = 0;
-var legend = new L.Control.Button(L.DomUtil.get('legendContent'), {position:'bottomleft'});
 
 
 var relsize;
@@ -1170,7 +1186,7 @@ function loadNgbhdInterface() {
 	
 	map.setZoom(13);
 
-	ngbhdSidebar_content = 'Click on a neighborhood to explore the Housing Market Study data!'; 
+	ngbhdSidebar_content = "<br>This is the interactive data portal for the <a style = 'text-decoration: none; font-weight:bold; color:#FF6600' 'href = 'http://www.restoringtrenton.org/#!neighborhood-conditions-study/zqams'>Neighborhood Conditions Study</a>. More details and the full report are <a style = 'text-decoration: none; font-weight:bold; color:#FF6600' href = 'http://www.restoringtrenton.org/#!neighborhood-conditions-study/zqams'>here</a>. <br><br><b>HOW THIS WORKS</B><br><br><li>You're currently seeing the <b>overall market conditions</b> -- a composite score we calculated for each neighborhood based on a bunch of indicators.</li><br><li>Click on a <b>neighborhood</b> to see its overall profile and a table of those indicators.</li><br><li>Click on an <b>indicator</b> to see a map of how different neighborhoods compare on that particular indicator. Scrolling over the map will show you the details for that indicator in each neighborhood.</li><br><li>Some indicators will also display a <b>chart</b> where you can see the trends for that indicator in the neighborhood over time.</li><br><li><b>Export</b> your dashboard by clicking the handy dandy .pdf button near the neighborhood's name.</li>"; 
 	document.getElementById("ngbhd_query_form").innerHTML = ngbhdSidebar_content;
 	
 	drawNgbhds();
@@ -1248,7 +1264,7 @@ function callIP() {
 			chartValues[i]=parseInt(100*arguments[i]);
 		}
 		chartType='line';
-	seriesName = '% of homes bought by absentee investors'
+	seriesName = '% of home sales to absentee investors'
 	chartSeries = [{name: seriesName, data: chartValues, lineWidth:4, marker:{radius:2}, color:'#FF9933'}];
 	makeChart();
 	refreshNgbhds();
@@ -1298,26 +1314,27 @@ function callComp() {
 	refreshNgbhds();
 }
 
-
-			
+		
 			dashboardSidebar.update = function(props) {
+				selNgbhd = props.nsa;
 				ngbhdSidebar_content = 
+					"<button class='btn-primary' id='export_as_pdf' style='float: right; padding-left:7px; padding-right:7px;font-family:Open Sans;font-weight:bold' onclick='javascript:exportPDF();'><i class='fa fa-file-pdf-o fa-2x'></i></button>" +
 					"<h2>" + props.nsa.toUpperCase() + "</h2>" +
 					"<hr>" +
-					"<div id='tierband' style='background-color:#009999'><a style='color:#ffffff' href='javascript:callComp()'>HOUSING MARKET</a>:<br> "+ props.comp_class.toUpperCase() + "</div>" + 
+					"<div id='tierband' style='background-color:#85CECE'><a style='color:#ffffff' href='javascript:callComp()'>HOUSING MARKET</a>: "+ props.comp_class.toUpperCase() + "</div>" + 
 					"<div id='chartbox'></div>" +
 					"<div id='tableContainer'>" +
 					"<table style='width:100%; border:none;text-align:right'>" +
-					"<tr><td style='text-align:left'><b>INDICATOR</b><br><span style='font-size:85%'>Click an indicator for maps & charts.</spa</td><td style='text-align:left'b>VALUE</td><td style='text-align:left'><b>TIER</b></td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callVac()'>HOME VACANCY RATE</a></td><td>" + parseInt(100*props.perc_vac) + "</td><td>" + props.vac + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callHo()'>HOMEOWNERSHIP RATE</a></td><td>" + parseInt(100*props.percent_oo) + "%</td><td>" + props.ho_rate + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callMSP(" + props.msp_2006 +","+ props.msp_2007 +"," + props.msp_2008+"," + props.msp_2009+"," + props.msp_2010+"," +props.msp_2011+"," +props.msp_2012+"," +props.msp_2013 + ")'>HOME SALE PRICE</a><br><span style='font-size:85%'>median, 2011-13</span></td><td>" + "$" + parseInt(props.msp_1113) + "</td><td>" + props.sale_pri + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callDOM(" + props.mdom_2006 +","+ props.mdom_2007 +"," + props.mdom_2008+"," + props.mdom_2009+"," + props.mdom_2010+"," +props.mdom_2011+"," +props.mdom_2012+"," +props.mdom_2013 + "," +props.mdom_2014 + ")'>DAYS ON MARKET</a><br><span style='font-size:85%'>median, 2011-13</span></td><td>" + parseInt(props.mdom_1113) + "</td><td>" + "N/A" + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callIP(" + props.ip_2006/props.sales_2006 +","+ props.ip_2007/props.sales_2007 +"," + props.ip_2008/props.sales_2008+"," + props.ip_2009/props.sales_2009 +"," + props.ip_2010/props.sales_2010+"," +props.ip_2011/props.sales_2011+"," +props.ip_2012/props.sales_2012+"," +props.ip_2013/props.sales_2013+ ")'>INVESTOR PURCHASES</a><br><span style='font-size:85%'>% of all home sales where the buyer was not an owner-occupant, 2000-2013</span></td><td>" + parseInt(100*props.perc_invst) + "%</td><td>" + props.inv_pur + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callForc(" + props.frc_2004 +"," + props.frc_2005 +"," + props.frc_2006 +","+ props.frc_2007 +"," + props.frc_2008+"," + props.frc_2009+"," + props.frc_2010+"," +props.frc_2011+"," +props.frc_2012+"," + props.frc_2013 + "," + props.frc_2014 +")'>FORECLOSURE RATE</a><br><span style='font-size:85%'>composite for 2006-14</span></td><td>" + parseInt(100*props.perc_forc) + "%</td><td>" + props.forc + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callTaxDel()'>TAX DELINQUENCY</a><br><span style='font-size:85%'>total class 2 tax delinquencies from 2006-2014, as a % of all class 2 properties in the neighborhood</span></td><td> " + parseInt(100*props.perc_tax_l) + "%</td><td>" + props.tax_del + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callTaxLien()'>TAX LIEN PURCHASES</a><br><span style='font-size:85%'>% of all tax liens that were bought by investors, 2006-2014 (this shows that investors are still interested)</span></td><td>" + parseInt(100*(props.tls_0614/(props.tls_0614 + props.tlso_0614))) + "%</td><td>" + props.tax_lien_i + "</div>" +
-					"<tr><td style='text-align:left'><a href='javascript:callCrime()'>VIOLENT CRIME RATE</a><br><span style='font-size:85%'>incidents per 1000 residents (three-year average, 2011-13)</span></td><td> " + parseInt(props.vc_rate/100) + "</td><td>" + props.vc_score + "</div>";
+					"<tr><td style='text-align:left'><b>INDICATOR</b><br><span style='font-size:85%'>Click an indicator for maps & charts.</spa</td><td style='text-align:left'><b>CHART?</b></td><td style='text-align:left'><b>VALUE</b></td><td style='text-align:left'><b>TIER</b></td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callVac()'>HOME VACANCY RATE</a><br><span style='font-size:85%'>one-time data for 2014</span></td><td></td><td>" + parseInt(100*props.perc_vac) + "%</td><td>" + props.vac + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callHo()'>HOMEOWNERSHIP RATE</a><br><span style='font-size:85%'>one-time data for 2014</span></td><td></td><td>" + parseInt(100*props.percent_oo) + "%</td><td>" + props.ho_rate + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callMSP(" + props.msp_2006 +","+ props.msp_2007 +"," + props.msp_2008+"," + props.msp_2009+"," + props.msp_2010+"," +props.msp_2011+"," +props.msp_2012+"," +props.msp_2013 + ")'>HOME SALE PRICE</a><br><span style='font-size:85%'>median, 2011-13</span></td><td>X</td><td>" + "$" + parseInt(props.msp_1113) + "</td><td>" + props.sale_pri + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callDOM(" + props.mdom_2006 +","+ props.mdom_2007 +"," + props.mdom_2008+"," + props.mdom_2009+"," + props.mdom_2010+"," +props.mdom_2011+"," +props.mdom_2012+"," +props.mdom_2013 + "," +props.mdom_2014 + ")'>DAYS ON MARKET</a><br><span style='font-size:85%'>median, 2011-13</span></td><td>X</td><td>" + parseInt(props.mdom_1113) + "</td><td>" + "N/A" + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callIP(" + props.ip_2006/props.sales_2006 +","+ props.ip_2007/props.sales_2007 +"," + props.ip_2008/props.sales_2008+"," + props.ip_2009/props.sales_2009 +"," + props.ip_2010/props.sales_2010+"," +props.ip_2011/props.sales_2011+"," +props.ip_2012/props.sales_2012+"," +props.ip_2013/props.sales_2013+ ")'>INVESTOR PURCHASES</a><br><span style='font-size:85%'>% of all home sales where the buyer was not an owner-occupant, 2000-2013</span></td><td>X</td><td>" + parseInt(100*props.perc_invst) + "%</td><td>" + props.inv_pur + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callForc(" + props.frc_2004 +"," + props.frc_2005 +"," + props.frc_2006 +","+ props.frc_2007 +"," + props.frc_2008+"," + props.frc_2009+"," + props.frc_2010+"," +props.frc_2011+"," +props.frc_2012+"," + props.frc_2013 + "," + props.frc_2014 +")'>FORECLOSURE RATE</a><br><span style='font-size:85%'>composite for 2006-14</span></td><td>X</td><td>" + parseInt(100*props.perc_forc) + "%</td><td>" + props.forc + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callTaxDel()'>TAX DELINQUENCY</a><br><span style='font-size:85%'>total class 2 tax delinquencies from 2006-2014, as a % of all class 2 properties in the neighborhood</span></td><td>X</td><td> " + parseInt(100*props.perc_tax_l) + "%</td><td>" + props.tax_del + "</td></tr>" +
+					"<tr><td style='text-align:left'><a href='javascript:callTaxLien()'>TAX LIEN PURCHASES</a><br><span style='font-size:85%'>% of all tax liens that were bought by investors, 2006-2014 (this shows that investors are still interested)</span></td><td>X</td><td>" + parseInt(100*(props.tls_0614/(props.tls_0614 + props.tlso_0614))) + "%</td><td>" + props.tax_lien_i + "</div>" +
+					"<tr><td style='text-align:left'><a href='javascript:callCrime()'>VIOLENT CRIME RATE</a><br><span style='font-size:85%'>incidents per 1000 residents, three-year average for 2011-13</span></td><td></td><td> " + parseInt(props.vc_rate/100) + "</td><td>" + props.vc_score + "</div>";
 						"</table>" +
 					"</div>";
 					document.getElementById("ngbhd_query_form").innerHTML = ngbhdSidebar_content;					
@@ -1335,6 +1352,11 @@ var selNgbhd = '';
 					else return '#555555';
 				}					
 
+var legendPresent = 0;
+var legendContent = '';
+var legend = L.control({position: 'topright'});
+var div = L.DomUtil.create('div', 'info legend');
+				
 function drawNgbhds() {
 	
 	featureColor=0;
@@ -1414,6 +1436,51 @@ function drawNgbhds() {
 					fillColor: getColor(featureColor)
 				};
 			}
+			
+			legend.onAdd = function (map) {
+				legend.update();
+				return div;
+			}
+			
+			legend.update = function() {
+				getLegend();
+				div.innerHTML = legendContent;
+			}
+
+			if (legendPresent == 0) {
+				legend.addTo(map);
+				legendPresent = 1;
+			}
+			
+			else {
+				legend.update();
+			}
+			
+			
+}
+
+function getLegend() {
+				if (selectedIndicator == 'COMPOSITE') {
+				
+				categories = ['STRONG','MODERATE','WEAK', 'VERY WEAK'];
+				legendContent = '<b>OVERALL CONDITIONS</b><br>';
+				for (var i = 0; i < categories.length; i++) {
+					legendContent +=
+					'<i style="background:' + getColor(i+1) + '"></i> ' +
+					(categories[i] ? categories[i] + '<br>' : '+');
+				}
+				}
+				
+				else {
+				
+				categories = ['1: VERY STRONG', '2: STRONG','3: MODERATE','4: WEAK', '5: VERY WEAK'];
+				legendContent = '<b>' + selectedIndicator + '</b><br>';
+				for (var i = 0; i < categories.length; i++) {
+					legendContent +=
+					'<i style="background:' + getColor(i+1) + '"></i> ' +
+					(categories[i] ? categories[i] + '<br>' : '+');
+				}
+				}
 }
 
 function makeChart() {
@@ -1427,7 +1494,10 @@ function makeChart() {
 	});
 
 }
-	
+
+function exportPDF() {
+	return xepOnline.Formatter.Format('ngbhd_query_form');
+}
   
   
 </script>
