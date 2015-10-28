@@ -1,1505 +1,874 @@
-<html>
-<head>
-<title>RESTORING TRENTON - INTERACTIVE MAP</title>
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
-<link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
-<script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
-<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
-<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
+String.prototype.toCamel = function(){
+	return this.replace(/(\-[a-z])/g, function($1){return $1.toUpperCase().replace('-','');});
+};
+String.prototype.fromCamel = function(){
+	return this.replace(/([A-Z])/g, function($1){return "-"+$1.toLowerCase();});
+};
 
-<script src="jquery/jquery-1.6.4.min.js"></script>
-<script src="spin-js/spin.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/2.4.0/math.min.js"></script>
-<script src="spin-js/jquery.spin.js"></script>
-<script src="d3-table/d3.min.js"></script>
-<script src="http://dimplejs.org/dist/dimple.v2.1.6.min.js"></script>
-<script src="leaflet-heat/leaflet-heat.js"></script>
-<script src="highcharts/highcharts.js"></script>
-<script src="leaflet-label/leaflet.label-src.js"></script>
-<link rel="stylesheet" href="leaflet-label/leaflet.label.css" />
+var xepOnline = window.xepOnline || {};
 
-<script src="css2pdf/xepOnline.jqPlugin.js"></script>
+var current_mimetype = "application/pdf";
+var current_stylesheet = "";
+var current_height = 0;
 
-<script src="leaflet-fullscreen/Control.FullScreen.js"></script>
-<link rel="stylesheet" href="leaflet-fullscreen/Control.FullScreen.css"></script>
-
-<link rel="stylesheet" href="GeoSearch/css/l.geosearch.css" />
-    <script src="GeoSearch/js/l.control.geosearch.js"></script>
-    <script src="GeoSearch/js/l.geosearch.provider.google.js"></script>
-
-<link rel="stylesheet" href="leaflet-sidebar/L.Control.Sidebar.css" />
-    <script src="leaflet-sidebar/L.Control.Sidebar.js"></script>
-	<script src="button/leaflet-button.js"></script>
-
-<button id="searchbutton" role="button" class="btn-primary" title="ADVANCED SEARCH"><img src="button/eye_444444_18.png"></button>
-<button id="quicksearchbutton" role="button" class="btn-primary" title = "QUICK SEARCH"><img src="button/search_444444_18.png"></button>
-<button id="deselectbutton" role="button" class="btn-primary" title = "CLEAR SELECTION"><img src="button/reply_ff9900_18.png"></button>
-<button id="data_list" role = "button" class="btn-switcher" style="z-index:10"><i class="fa fa-dashboard fa-2x" style="float:left; padding-right:3px; padding-left:2px;"></i><p style="float:left; color:#888888; margin-top:5px;margin-bottom:3px;padding-left:3px;padding-right:3px;font-family:'Open Sans'">DASHBOARDS</P>
-	<form id="modeList" style="display:none; padding-right:3px;"><br><BR>
-	<HR>
-	<input type="radio" name="mode" id="crime_mode" value="crime_mode" onchange="displaySelectedMode()">CRIME</input><BR>
-	<input type="radio" name="mode" id="ngbhd_mode" value="ngbhd_mode" onchange="displaySelectedMode()">NEIGHBORHOODS</input><BR>
-	<hr>
-	<input type="radio" name="mode" id="property_mode" value="property_mode" onchange="displaySelectedMode()" checked>PROPERTIES</input>
-	</form></button>
-<button id="crimeFilters" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'">VIOLENT CRIME</button>
-<button id="ngbhdFilters" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'">NEIGHBORHOODS</button>
-
-</head>
-<body>
-
-<style>
-
-
-.leaflet-control-layers-toggle:after{ 
+function base64ToBuffer(base64) {
+  var binstr = atob(base64);
+  var buf = binaryStringToBuffer(binstr);
+  return buf;
 }
 
-.leaflet-control-layers-toggle{ 
-    width:32px;
-	height:32px;
-    background-position:3px 50% ;
-	text-decoration:none;
-	z-index:2;
-	icon: 'button/fa-list_24_0_444444_none.png';
-} 
+window.Unibabel = {
+  utf8ToBinaryString: utf8ToBinaryString
+, utf8ToBuffer: utf8ToBuffer
+, utf8ToBase64: utf8ToBase64
+, binaryStringToUtf8: binaryStringToUtf8
+, bufferToUtf8: bufferToUtf8
+, base64ToUtf8: base64ToUtf8
+, bufferToBinaryString: bufferToBinaryString
+, bufferToBase64: bufferToBase64
+, binaryStringToBuffer: binaryStringToBuffer
+, base64ToBuffer: base64ToBuffer
 
-.circle {
-    background-image: url('button/fa-circle_32_0_444444_none.png');
-	width:32px;
-	height:32px;
-	line-height:32px;
-    text-align: center;
-	color: #fff;
-}
+// compat
+, strToUtf8Arr: utf8ToBuffer
+, utf8ArrToStr: bufferToUtf8
+, arrToBase64: bufferToBase64
+, base64ToArr: base64ToBuffer
+};
 
-		.info {
-			padding: 6px 8px;
-			font: 90% Open Sans;
-			background: white;
-			background: rgba(255,255,255,0.9);
-			box-shadow: 0 0 15px rgba(0,0,0,0.2);
-			border-radius: 5px;
-		}
+function bufferToHex(arr) {
+  var i;
+  var len;
+  var hex = '';
+  var c;
 
-		.legend {
-			text-align: left;
-			line-height: 18px;
-			color: #555;
-		}
-		.legend i {
-			width: 18px;
-			height: 18px;
-			float: left;
-			margin-right: 8px;
-			opacity: 0.9;
-		}
-
-#sidebar{
-	font-family:"Courier New";
-	padding:10px;
-}
-
-#dashboardSidebar{
-	font-family:"Courier New";
-	padding:10px;
-}
-
-#option{
-	font-family:"Courier New";
-}
-
-.btn-switcher{
-	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.25);
-	background-color:#ffffff;
-	font-family:"Courier New";
-	font-size:12px;
-	color:#777777;
-	border-radius: 4px;
-	margin: 0 0 0 10px;
-	padding: 3px;
-	height: auto;
-	float:right;
-	text-align:left;
-}
-
-.dashboards {
-	border: 1px solid #aaaaaa;
-	box-shadow: 1px 1px 2px #999999;
-	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.25);
-	background-color:#ffffff;
-	font-family:"Courier New";
-	font-size:12px;
-	color:#777777;
-	border-radius: 4px;
-	margin: 0 0 0 10px;
-	padding: 8px;
-	height: auto;
-}
-
-.btn-primary{
-	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.25);
-	background-color:#ffffff;
-	font-family:"Courier New";
-	font-size:12px;
-	color:#777777;
-	border-radius: 4px;
-	margin: 0 0 0 10px;
-	padding: 3px;
-	height: auto;
-}
-
-table, td {
-	border-collapse: collapse;
-	border: solid 1px #cccccc;
-	font-family: "Open Sans";
-	font-size:12px;
-}
-
-td {
-    padding: 8px;
-	text-align:'right';
-}
-
-a:link { color:#006666; text-decoration:none;}
-a:hover { color: #ff9900; }
-
-#spinBox {
-    z-index:999;
-    opacity:0.5;
-    display:none;
-    border-radius:0.25em;
-    width:5em;
-    height:5em;
-    margin: -2.5em 0 0 -2.5em;
-    background-color:#f0f3f6;
-    border:1px solid #fff;
-    position:fixed;
-    top:50%;
-    left:50%
-}
-
-#queryTable {
-	font-family:"Courier New";
-	font-size:12px;
-}
-
-#tierBand {
-	font-weight:bold;
-	font-size:120%;
-	color:#ffffff;
-	width:95%;
-	margin-bottom:8px;
-	padding-left:10px;
-}
-
-.leaflet-label-other {
-  background-color: #fff;
-  border: 1px solid #444;
-  border-radius: 3;
-  color: #444;
-  font-weight: normal;
-  opacity: 0.7;
-  padding: 3px;
-}
-
-</style>
-
-
-<div id = "queryTable" style="margin: 20px auto; width: 100%; display:none"></div>
-
-<div id="map" style="width: 100%; height: 100%;"></div>
-<div id="spinBox" claVss='spinner'></div>
-
-<script type="text/javascript">
-
-var config =
-{
-	city: "Trenton",
-	southwest: L.latLng(40.18000, -74.85000),
-    northeast: L.latLng(40.26000, -74.67000),
-    rev_geocoding_apikey: 'AIzaSyAKf5AB_5QngOuThxqDCo8A8U17qpCBu00',
-    database_name: 'trenton_master',
-    additional_attrib : 'created by iana dikidjieva for <a href="http://www.restoringtrenton.org">restoring trenton</a>.<br>',
-   	sql_url : 'http://restoringtrenton.cartodb.com/api/v2/sql?q=',
-	propertySearch_sidebar : "<fieldset><b>ADVANCED PROPERTY SEARCH</b><br>" +
-	"<span style='font-size:85%'><a style = 'text-decoration:none; color: #FF3300' href='http://www.restoringtrenton.org/#!using-the-interactive-map/c10s2'>Instructions on constructing your queries can be found here</a>.</span>" + 
-	"<table style='border:none'><tr><td style='border:none'>" +
-		"<p style='float:left; padding-left:7px; padding-right:7px;'><a id='btnQuery' class='btnQuery' href='javascript:mapSelection();'><img src='button/map_000000_32.png'></a><br>MAP</p>" +
-		"<p style='float:left; padding-left:7px; padding-right:7px; '><a id='btnTable' class='btnTable' href='javascript:makeTable();'><img src='button/table_444444_32.png'></a><br>TABLE</p>" +
-		"<p style='float:left; padding-left:7px; padding-right:7px'><a id='btnDownload' class='btnDownload' href='javascript:downloadSelection();'><img src='button/download_000000_32.png'></a><br>SAVE</p>" +
-		"<p style='float:left; padding-left:7px; padding-right:7px'><a id='btnClear' class='btnClear' href='javascript:clearSelection();'><img src='button/reply_000000_32.png'></a><br>CLEAR</p>" +		
-	"</tr></td></table>" +
-	"<hr>" +
-	"<form id='advanced_search'>"+
-	"<b>ADDRESS</b><br>" + "<input type='text' id = 'SR_address' value = ''>" + "<br>"  +
-    "<b>OWNER</b><br> <input type = 'text' id='SR_owner' value = ''>" + "<br>" +
-    "<b>OWNER LOCATION</b><br><span style='font-size:85%'>address, city, and/or zip</span><br> <input type = 'text' id='SR_owner_add' value = ''>" + "<br>" +
-    "<b>PARCEL TYPE</b><br>" +
-		"<select id='SR_parc_type' name='SR_parc_type'>" + "<br>" +
-  			"<option value='ANY' selected='selected'>ANY</option>" +
-  			"<option value='VACANT BLDG'>VACANT BLDG</option>" +
-  			"<option value='VACANT LOT'>VACANT LOT</option>" +
-		"</select> " + 
-		"<br><br>" +
-		"<div class='checkbox'><label><input type = 'checkbox' id='SR_class'><b>PROPERTY CLASS 2</B><br>1-4 family residential</option></label></div>" +
-		"<br>" +
-		"<b>CONDITIONS</b><br>"+
-		"<span style='font-size:85%'>Selecting more conditions will find properties with ANY of these conditions ('OR' search):</span>" +
-		"<div class='checkbox'><label><input type = 'checkbox' id='dumping'>DUMPING</option></label></div>" +
-	    "<div class='checkbox'><label><input type = 'checkbox' id='trash'>TRASH</option></label></div>" + 
-	    "<div class='checkbox'><label><input type = 'checkbox' id='xs'>Xs</option></label></div>" +
-	    "<div class='checkbox'><label><input type = 'checkbox' id='dilapidated'>DILAPIDATED</option></label></div>" +
-	    "<div class='checkbox'><label><input type = 'checkbox' id='unsecured'>UNSECURED</option></label></div>" +
-	    "<div class='checkbox'><label><input type = 'checkbox' id='animals'>ANIMALS</option></label></div>" + 
-		"<div class='checkbox'><label><input type = 'checkbox' id='unmaintained'>UNMAINTAINED</option></label></div>" +
-	    "<div class='checkbox'><label><input type = 'checkbox' id='weeds'>WEEDS</option></label></div>" +
-		"<br><b>ZONING</b> <select id='SR_zoning' name='SR_zoning'>" + "<br>" +
-  			"<option value='ANY' selected='selected'>ANY</option>" +
-  			"<option value='RESIDENCE'>RESIDENTIAL</option>" +
-  			"<option value='BUSINESS'>COMMERCIAL</option>" +
-			"<option value='INDUSTRIAL'>INDUSTRIAL</option>" +
-			"<option value='MIXED USE'>MIXED USE</option>" +
-		"</select> " + "<br>" +
-	    "</form></fieldset>",
-		
-		crimeSidebar_content : "<fieldset><b>VIOLENT CRIME</b><br>" +
-		"Disclaimers and suchlike." + 
-		"<hr>" +
-			"<button class='btn-primary' id='crimeQuery' style='float: right; padding-left:7px; padding-right:7px;font-family:Open Sans;font-weight:bold' onclick='javascript:drawCrime();'><i class='fa fa-search'></i>  SHOW</button>" +
-		"<form id='crime_query_form'>"+
-		"<b>DISPLAY</b>" +
-		"<br><input type='checkbox' class='crimemaptype' id='incidents'>Incidents</input>" +
-		"<br><input type='checkbox' class='crimemaptype' id='heatmap' checked>Heatmap</input>" +
-		"<br><span style='font-size:85%'>Note: Heatmap colors do not correspond to incident colors. Zoom in to see individual points in Incident mode.</span>" +
-		"<hr>"+
-		"<p id='crimeQueryResult'></p>" +
-		"<hr>" +
-		"<b>YEARS</b>" +
-		"<br><input type='checkbox' class='year' id='2013' checked>2013</input>" +	
-		"<br><input type='checkbox' class='year' id='2012'>2012</input>" +	
-		"<br><input type='checkbox' class='year' id='2011'>2011</input>" +
-		"<br><input type='checkbox' class='year' id='2010'>2010</input>" +	
-		"<br><input type='checkbox' class='year' id='2009'>2009</input>" +	
-		"<hr>"+
-		"<b>CATEGORIES</b>"+
-		"<br><input type='checkbox' class='crimecat' id='larceny'><i class='fa fa-circle' style='color:#FFFF00'></i> Larceny Theft</input>" +
-		"<br><input type='checkbox' class='crimecat' id='agg'><i class='fa fa-circle' style='color:#FF0000'></i> Aggravated Assault</input>" +	
-		"<br><input type='checkbox' class='crimecat' id='robbery'><i class='fa fa-circle' style='color:#FF66FF'></i> Robbery</input>" +
-		"<br><input type='checkbox' class='crimecat' id='vehicle'><i class='fa fa-circle' style='color:#FF9966'></i> Motor Vehicle Theft</input>" +	
-		"<br><input type='checkbox' class='crimecat' id='burglary'><i class='fa fa-circle' style='color:#660033'></i> Burglary</input>" +
-		"<br><input type='checkbox' class='crimecat' id='rape'><i class='fa fa-circle' style='color:#CC0066'></i> Rape</input>" +
-		"<br><input type='checkbox' class='crimecat' id='arson'><i class='fa fa-circle' style='color:#FF9900'></i> Arson</input>" +
-		"<br><input type='checkbox' class='crimecat' id='homicide'><i class='fa fa-circle' style='color:#FF3300'></i> Homicide</input>" +
-			"</form></fieldset>",
-		
-		ngbhdSidebar_content : 	
-					"<fieldset><b>NEIGHBORHOOD CONDITIONS</b><br>" +
-					"<hr>" +
-					"<div id='ngbhd_query_form' style='font-family:Open Sans'>"+
-					"</div></fieldset>",
-		
-		table_base : "<h3>SEARCH RESULTS</h3>" + 
-			"<button role='button' class='btn-primary' onclick='javascript:hideTable();'><img src='button/map_444444_16.png'></button> back to map "+
-			"<button role='button' class='btn-primary' onclick='javascript:downloadSelection();'><img src='button/download_444444_16.png'></button> save as .csv " +
-			"<hr>"
-	  
-}	
-
-var sql = new cartodb.SQL({ user: 'restoringtrenton', format: 'geojson' });
-var polygon;
-var searchPolygons = [];
-var searchResults = [];
-var searchModule;
-var quickSearchOn = 0;
-var sidebar;
-var cartoURL = '';
-var query_string='';
-var queryHighlightOn = 0;
-var deselectButton = new L.Control.Button(L.DomUtil.get('deselectbutton'), { toggleButton: 'active' });
-var crimeSidebarButton = new L.Control.Button(L.DomUtil.get('crimeFilters'), {position:'topright', toggleButton: 'active' }).on('click', function () {
-			dashboardSidebar.toggle();
-		});
-var ngbhdSidebarButton = new L.Control.Button(L.DomUtil.get('ngbhdFilters'), {position:'topright', toggleButton: 'active' }).on('click', function () {
-			dashboardSidebar.toggle();
-		});
-var modeSwitcher = new L.Control.Button(L.DomUtil.get('data_list'), {position:'topright'});
-var crimeData = new L.geoJson();
-var crimeSQL = "";
-var crimeCluster = new L.markerClusterGroup();
-var crimeCoords = [];
-var crimeHeat = L.heatLayer();
-var ngbhdSQL = "";
-var ngbhdLayer = new L.geoJson();
-var crimeButtonOn = 0;
-var ngbhdButtonOn = 0;
-var crimeCounter = 0;
-
-
-var relsize;
-
-var popup = L.popup();
-
-var map = L.map('map').setView([40.224, -74.76], 15);
-
-
-var stamen = L.tileLayer('http://a.tile.stamen.com/toner-lite/{z}/{x}/{y}.png', {attribution: config.additional_attrib + ' uses a <a href="http://stamen.com">stamen</a> basemap'});
-stamen.addTo(map);
-
-googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3'],
-	attribution: config.additional_attrib + ' uses google satellite'
-});
-
- 
-var bases = { "streets (stamen toner lite)": stamen, "google satellite": googleSat};
-
-<!-- BE SURE THIS IS THE LATEST UPDATE OF THE MASTER PARCEL FILE, AND THAT IT IS ACTUALLY CALLED 'trenton_master' OR EVERYTHING WILL BREAK!!! -->
-var parcelMasterURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/aebbd47a-5690-11e5-beed-0e853d047bba/viz.json';
-
-<!-- reference auxiliary data -->
-
-<!-- colors on redev areas layer are styled in cartodb bc i am lazy -->
-var redev_areasURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/c0afc7fc-5692-11e5-ac65-0e0c41326911/viz.json';
-
-<!-- colors and label on neighborhood layer are styled in cartodb -->
-var ngbhd_masterURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/cb60f754-72a1-11e5-88a3-0e3ff518bd15/viz.json'; 
-
-var infoLayer = new L.geoJson();
-var formURL = '';
-
-var spinner = new Spinner().spin(spinBox);
-$('#spinBox').show();
-cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM trenton_master WHERE parc_type ilike '%vacant%'");
-
-		$.getJSON(cartoURL_infolayer,
-            function(data) {
-			
-	        infoLayer = L.geoJson(data, {
-				style: 	{color: "#ffffff", fillColor:"#ffffff", weight: 0, opacity:0, fillOpacity:0},
-				
-				onEachFeature: function (feature, layer) {
-				var bounds = layer.getBounds();
-				var center = bounds.getCenter();
-
-				//sigh, we resort to creepy google again to make the form to report the issues. 
-				
-				var propAdd = feature.properties.address;
-				var cartodbID = feature.properties.cartodb_id;
-				var formURL="https://docs.google.com/forms/d/11QPK0sF29VREQR3ke-Td3EUd1LoCh9UbHR8um8xSOrY/viewform?entry.1233008467="+propAdd+"&entry.492807532="+cartodbID+"&entry.935525454="+center+"&entry.1771840456&entry.1915372513&entry.2060863861&entry.1480924992&entry.1569579456";
-				
-				//but check out our sexy popup 
-				
-				var popupContent = "<b>"+ feature.properties.address + 
-									"</b><br>"+ feature.properties.parc_type +
-									"<hr><b><a target = 'blank' href='"+ formURL + "'>REPORT AN ISSUE</a></b>" +
-									"<hr><b>OWNER</B><BR>"+feature.properties.owner +
-									"<br>"+feature.properties.ownstreet + 
-									"<br>"+feature.properties.owncity +
-									"<br><br><B>CONDITIONS</B>: " + feature.properties.conditions + 
-									"<br><B>FIELD NOTES</B>: " + feature.properties.notes + 
-									"<hr><B>TAX INFO</B><BR>LEADLOT: " + feature.properties.leadlot +
-									"<BR>TAXES: $" + feature.properties.taxes +									
-									"<br>ASSESSED: $"+feature.properties.totalassmt +
-									"<br>LIENS (CITY): $" + feature.properties.city_liens + 
-									"<br>LIENS (PRIVATE): $" + feature.properties.priv_liens + 
-									"<hr><b>LAND USE INFO</B><BR>REDEV'T AREA: " + feature.properties.redev_area + 
-									"<br>ZONING: "+feature.properties.zone_abrv+"&nbsp"+feature.properties.descriptio + 
-									"<hr><b>ACTIONS</B><BR>TAX FORECLOSURE: " + feature.properties.foreclosed + 
-									"<br>CITY AUCTION: " + feature.properties.auction;
-				layer.bindPopup(popupContent);
-				}
-			});
-				$('#spinBox').hide();
-				infoLayer.addTo(map);
-				
-		});
-
-<!-- array to hold the different overlay layers we're creating from different queries of the property database -->
-  overlayLayers = {}; 
-		<!-- don't forget to add any new layers to the menu! -->
-  var sublayers = [allPropsGet, vacantPropsGet, lienPropsGet, cityOwnedVacGet, redevAreaGet];
-
-
-
-<!-- basic parcel outlines - for some reason the layer selector breaks if this isn't loaded early. one day i'll learn why. -->
-  
-  cartodb.createLayer(map, parcelMasterURL)
-    .addTo(map)
-    .on('done', function(layer) { 
-      layer.setZIndex(1);
-      var sublayer = layer.getSubLayer(0);
-      sublayer.set(allPropsGet);
-      sublayers.push(sublayer);
-      overlayLayers["BASE PARCELS"] = layer;
-
-      layer.setInteraction(true);
-	  
-
-     }).on('error', function() { 
-      //log the error
-    });
-
- 	
-  var allPropsGet = {
-    sql: "SELECT * FROM trenton_master",
-    cartocss: "#trenton_properties{polygon-fill: #fff; polygon-opacity:0;line-color:#999; line-opacity:0.2;} #trenton_properties[parc_type='OPEN SPACE OR CEMETERY'] {polygon-fill:#259073; polygon-opacity:.3;}",
-  }
-  
-  var vacantPropsGet = {
-    sql: "SELECT * FROM trenton_master where parc_type like '%VACANT%'",
-    cartocss: "#trenton_master[parc_type='VACANT LOT']{polygon-fill: #B9D132; polygon-opacity:0.5;line-color:#fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT BLDG'] {polygon-fill: #FF0000; polygon-opacity:0.5;line-color: #fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT LOWER'] {polygon-fill: #FF9900; polygon-opacity:0.6;line-color: #fff; line-opacity:0.4;}",
-	  }
-
- 
-
-  var lienPropsGet = {
-    sql: "SELECT * FROM trenton_master where (city_liens > 0 or priv_liens > 0)",
-    cartocss: "#trenton_properties{polygon-fill: #000; polygon-opacity:0.2;line-color:#00FFFF ; line-width: 2; line-opacity:0.7;}"
-  }
-  
-    var cityOwnedVacGet = {
-    sql: "SELECT * FROM trenton_master where (owner like '%CITY OF TRENTON%' and parc_type like '%VACANT%')",
-    cartocss: "#trenton_properties{polygon-opacity:0;line-color:#FFFF00; line-width: 2; line-opacity:0.6;}"
+  for (i = 0, len = arr.length; i < len; i += 1) {
+    c = arr[i].toString(16);
+    if (c.length < 2) {
+      c = '0' + c;
+    }
+    hex += c;
   }
 
- var redevAreaGet = {
-	 sql: "SELECT * FROM redev_areas"}
-	 
- var ngbhd_basicGet = {
-	 sql: "SELECT * FROM ngbhd_master"
-	 }
-  
-<!-- var homesteadGet = {
- //   sql: "SELECT * FROM trenton_master where owner = 'CITY OF TRENTON' and class = '2' and parc_type = 'VACANT BLDG' and redev_area is not NULL",
- //   cartocss: "#trenton_properties{polygon-fill: #00FBFF; polygon-opacity:0.2;line-color:#00FBFF ; line-width: 3; line-opacity:0.8;}"
- // }
+  return hex;
+}
 
- 
-  var auctionsGet = {
-	 sql: "SELECT * FROM auctionURL",
-	 cartocss: "#auctions{polygon-fill:...; ...}"
- }
- 
- 
--->
+function hexToBuffer(hex) {
+  // TODO use Uint8Array or ArrayBuffer or DataView
+  var i;
+  var byteLen = hex.length / 2;
+  var arr;
+  var j = 0;
 
-<!-- here are the vacants -->  
-  cartodb.createLayer(map, parcelMasterURL)
-    .addTo(map)
-    .on('done', function(layer) { 
-      layer.setZIndex(2);
-      var sublayer = layer.getSubLayer(0);
-	  sublayer.set(vacantPropsGet);
-      sublayers.push(sublayer);
-      overlayLayers["VACANT PROPERTIES"] = layer;
+  if (byteLen !== parseInt(byteLen, 10)) {
+    throw new Error("Invalid hex length '" + hex.length + "'");
+  }
 
-      layer.setInteraction(false);
-	  
-     }).on('error', function() { 
-      //log the error
-    });
+  arr = new Uint8Array(byteLen);
 
-	
-<!-- taking out the homestead layer since we don't KNOW YET, argh	-->
-//  cartodb.createLayer(map, parcelMasterURL)
-//    .addTo(map)
-//    .on('done', function(layer) { 
-//      layer.setZIndex(4);
-//      var sublayer = layer.getSubLayer(0);
-//      sublayer.set(homesteadGet);
-//      sublayers.push(sublayer);
-//      overlayLayers["POSSIBLE HOMESTEADS"] = layer;
-//        layer.setInteraction(false);
-	  
-//     }).on('error', function() { 
-      //log the error
-//    });
+  for (i = 0; i < byteLen; i += 1) {
+    arr[i] = parseInt(hex[j] + hex[j + 1], 16);
+    j += 2;
+  }
 
+  return arr;
+}
 
-<!-- enable the auction layer when there's an upcoming auction -->	
-/*  cartodb.createLayer(map, parcelMasterURL)
-    .addTo(map)
-    .on('done', function(layer) { 
-      layer.setZIndex(5);
-      var sublayer = layer.getSubLayer(0);
-      sublayer.set(auctionGet);
-      sublayers.push(sublayer);
-      overlayLayers["AUCTIONS"] = layer;
-      layer.setInteraction(false);
-	  
-     }).on('error', function() { 
-      //log the error
-    });
-*/
+// Hex Convenience Functions
+window.Unibabel.hexToBuffer = hexToBuffer;
+window.Unibabel.bufferToHex = bufferToHex;
 
-<!-- city-owned vacants -->
- cartodb.createLayer(map, parcelMasterURL)
-    .on('done', function(layer) { 
-      layer.setZIndex(10);
-      var sublayer = layer.getSubLayer(0);
-      sublayer.set(cityOwnedVacGet);
-      sublayers.push(sublayer);
-      overlayLayers["CITY-OWNED VACANTS"] = layer;
-      layer.setInteraction(false);
+function utf8ToBinaryString(str) {
+  var escstr = encodeURIComponent(str);
+  // replaces any uri escape sequence, such as %0A,
+  // with binary escape, such as 0x0A
+  var binstr = escstr.replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode('0x' + p1);
+  });
 
-     }).on('error', function() { 
-      //log the error
-    });	
+  return binstr;
+}
 
+function utf8ToBuffer(str) {
+  var binstr = utf8ToBinaryString(str);
+  var buf = binaryStringToBuffer(binstr);
+  return buf;
+}
 
-	
-<!-- liens, whoo -->
-  cartodb.createLayer(map, parcelMasterURL)
-    .on('done', function(layer) { 
-      layer.setZIndex(5);
-      var sublayer = layer.getSubLayer(0);
-      sublayer.set(lienPropsGet);
-      sublayers.push(sublayer);
-      overlayLayers["TAX LIENS"] = layer;
-	        layer.setInteraction(false);
-	  	  
-     }).on('error', function() { 
-      //log the error
-    });
+function utf8ToBase64(str) {
+  var binstr = utf8ToBinaryString(str);
+  return btoa(binstr);
+}
 
-<!-- neighborhood boundaries -->
-cartodb.createLayer(map, ngbhd_masterURL)
-    .on('done', function(layer) { 
-      layer.setZIndex(13);
-      var sublayer = layer.getSubLayer(0);
+function binaryStringToUtf8(binstr) {
+  var escstr = binstr.replace(/(.)/g, function (m, p) {
+    var code = p.charCodeAt(p).toString(16).toUpperCase();
+    if (code.length < 2) {
+      code = '0' + code;
+    }
+    return '%' + code;
+  });
 
-      sublayer.set(ngbhd_basicGet);
-      sublayers.push(sublayer);
-	  layer.setInteraction(false);
-      overlayLayers["NEIGHBORHOOD BOUNDARIES"] = layer;
-	 
-     }).on('error', function() { 
-      //log the error
-    });
-	
-<!-- redevelopment areas -->
-cartodb.createLayer(map, redev_areasURL)
-    .on('done', function(layer) { 
-      layer.setZIndex(15);
-      var sublayer = layer.getSubLayer(0);
+  return decodeURIComponent(escstr);
+}
 
-      sublayer.set(redevAreaGet);
-      sublayers.push(sublayer);
-	  layer.setInteraction(false);
-      overlayLayers["REDEVELOPMENT AREAS"] = layer;
-	  
-	  <!-- YOU HAVE TO PUT THE LAYER SELECTOR IN THE LAST LAYER. DON'T $@^! ASK. -->
-	  L.control.layers(bases, overlayLayers, {position:'topleft'}).addTo(map);
+function bufferToUtf8(buf) {
+  var binstr = bufferToBinaryString(buf);
 
+  return binaryStringToUtf8(binstr);
+}
 
+function base64ToUtf8(b64) {
+  var binstr = atob(b64);
 
-     }).on('error', function() { 
-      //log the error
-    });
+  return binaryStringToUtf8(binstr);
+}
 
-<!-- data mode switcher -->	
+function bufferToBinaryString(buf) {
+  var binstr = Array.prototype.map.call(buf, function (ch) {
+    return String.fromCharCode(ch);
+  }).join('');
 
-var listOn = 0;
-	
-	modeSwitcher.addTo(map);
-	
-	modeSwitcher.on('click', function() {
+  return binstr;
+}
 
-	if (listOn !=1) {
-		modeList.style.display='block';
-		listOn = 1;
-		}
-	
-	else {
-		modeList.style.display='none';
-		listOn = 0;
-		}
-	});
+function bufferToBase64(arr) {
+  var binstr = bufferToBinaryString(arr);
+  return btoa(binstr);
+}
 
-	function displaySelectedMode(){
-		var whichMode = $( "input:radio[name=mode]:checked" ).val();
-		console.log(whichMode);
+function binaryStringToBuffer(binstr) {
+  var buf;
 
-			if (whichMode == "crime_mode") {
-					loadCrimeInterface();
-				}
-			
-			else if (whichMode =="ngbhd_mode") {
-					loadNgbhdInterface();
-			}
-			else if (whichMode =="property_mode") {
-				map.removeLayer(crimeCluster);
-				map.removeLayer(crimeHeat);
-	
-				if (crimeButtonOn != 0){
-					crimeSidebarButton.removeFrom(map);
-					crimeButtonOn = 0;
-					};
-					
-				map.removeLayer(ngbhdLayer);
-				if (ngbhdButtonOn !=0){
-					ngbhdSidebarButton.removeFrom(map);
-					ngbhdButtonOn = 0;
-				};
-				
-			}
+  if ('undefined' === typeof Uint8Array) {
+    buf = new Uint8Array(binstr.length);
+  } else {
+    buf = [];
+  }
+
+  Array.prototype.forEach.call(binstr, function (ch, i) {
+    buf[i] = ch.charCodeAt(0);
+  });
+
+  return buf;
+}
+
+function base64ToBuffer(base64) {
+  var binstr = atob(base64);
+  var buf = binaryStringToBuffer(binstr);
+  return buf;
+}
+
+window.Unibabel = {
+  utf8ToBinaryString: utf8ToBinaryString
+, utf8ToBuffer: utf8ToBuffer
+, utf8ToBase64: utf8ToBase64
+, binaryStringToUtf8: binaryStringToUtf8
+, bufferToUtf8: bufferToUtf8
+, base64ToUtf8: base64ToUtf8
+, bufferToBinaryString: bufferToBinaryString
+, bufferToBase64: bufferToBase64
+, binaryStringToBuffer: binaryStringToBuffer
+, base64ToBuffer: base64ToBuffer
+
+// compat
+, strToUtf8Arr: utf8ToBuffer
+, utf8ArrToStr: bufferToUtf8
+, arrToBase64: bufferToBase64
+, base64ToArr: base64ToBuffer
+};
+
+function convertImgToBase64(url, callback){
+	var img = new Image();
+	img.crossOrigin = 'Anonymous';
+	img.onload = function(){
+	    var canvas = document.createElement('CANVAS');
+	    var ctx = canvas.getContext('2d');
+		canvas.height = this.height;
+		canvas.width = this.width;
+	  	ctx.drawImage(this,0,0);
+	  	var dataURL = canvas.toDataURL();
+	  	callback(dataURL);
+	  	canvas = null; 
+	};
+	   img.src = url;
+}
+
+xepOnline.IE = function() {
+	var ua = window.navigator.userAgent;
+	var msie = ua.indexOf('MSIE ');
+	var trident = ua.indexOf('Trident/');
+	var edge = ua.indexOf('Edge/');
+
+	if (msie > 0) {
+		// IE 10 or older => return version number
+		return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
 	}
 
-
- <!-- property query sidebar -->
- 
-  var div_sidebar = document.createElement('div');
-  div_sidebar.id = "sidebar";
-  div_sidebar.class = "sidebar";
-  $('body')[0].appendChild(div_sidebar);
-  
-  sidebar = L.control.sidebar('sidebar', {
-      position: 'left'
-  });
-	map.addControl(sidebar);
-	sidebar.setContent(config.propertySearch_sidebar);
-  
-  	searchButton = new L.Control.Button(L.DomUtil.get('searchbutton'), { toggleButton: 'active' });
-	searchButton.addTo(map);
-	searchButton.on('click', function () {
-		sidebar.toggle()
-	});
-
- <!-- dashboard sidebar -->
- 
-  var dashboard_sidebar = document.createElement('div');
-  dashboard_sidebar.id = "dashboardSidebar";
-  dashboard_sidebar.class = "sidebar";
-  $('body')[0].appendChild(dashboard_sidebar);
-  
-  dashboardSidebar = new L.control.sidebar('dashboardSidebar',{
-      position: 'right'
-  });
-	map.addControl(dashboardSidebar);
+	if (trident > 0) {
+		// IE 11 => return version number
+		var rv = ua.indexOf('rv:');
+		return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10) >= 11;
+	}
 	
- <!-- stupid Google search addresses (THIS DOES NOT QUERY THE ACTUAL dB) -->
-	searchModule = new L.Control.GeoSearch({
-				provider: new L.GeoSearch.Provider.Google(), showMarker: false,
-			})
-	quicksearchButton = new L.Control.Button(L.DomUtil.get('quicksearchbutton'), { toggleButton: 'active' });
-	quicksearchButton.addTo(map);
-	quicksearchButton.on('click', function () {
-		if (quickSearchOn != 0) {
-			searchModule.removeFrom(map);
-			quickSearchOn = 0;
-			console.log('quick search is now off');
+	if (edge > 0) {
+		// IE 12 => return version number
+		return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+	}
+
+	// other browser
+	return false;
+}
+
+// TODO: better mobile check
+xepOnline.detectmob1=function(){if( navigator.userAgent.match(/Android/i)||navigator.userAgent.match(/webOS/i)||navigator.userAgent.match(/iPhone/i)|| navigator.userAgent.match(/iPad/i)|| navigator.userAgent.match(/iPod/i)|| navigator.userAgent.match(/BlackBerry/i)||navigator.userAgent.match(/Windows Phone/i)){return true;}else {return false;}}
+xepOnline.mobilecheck = function() {
+	var check = false;
+	(function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
+	return xepOnline.detectmob1() || check;
+}
+
+xepOnline.DEFAULTS = {
+	pageWidth:"8.5in",
+	pageHeight:"11in",
+	pageMargin:".50in"
+};
+
+// TODO: better media ignore method, maybe poke the css stylesheet to verify this is "the" bootstrap.css media to ignore
+xepOnline.MEDIA_IGNORE = [
+	"bootstrap.css",
+	"bootstrap.min.css"
+]
+
+xepOnline.Formatter = {
+	clean_tags: ['img', 'hr', 'br', 'input', 'col ', 'embed', 'param', 'source', 'link'],
+	fo_attributes_root: [
+			'color', 
+			'height',
+			'fontStyle', 'fontVariant', 'fontWeight', 'fontSize', 'fontFamily', 
+			'textAlign',
+			'width'
+	],
+	fo_attributes: [
+			'lineHeight', 
+			'alignmentBaseline', 
+			'backgroundImage', 'backgroundPosition', 'backgroundRepeat', 'backgroundColor',
+			'baselineShift', 
+			'borderTopWidth','borderTopStyle','borderTopColor', 
+			'borderBottomWidth','borderBottomStyle','borderBottomColor',
+			'borderLeftWidth','borderLeftStyle','borderLeftColor',
+			'borderRightWidth','borderRightStyle','borderRightColor',
+			'borderCollapse',             
+			'clear', 'color', 
+			'display', 'direction', 'dominantBaseline', 
+			'fill', 'float', 
+			'fontStyle', 'fontVariant', 'fontWeight', 'fontSize', 'fontFamily', 
+			'height',
+			'listStyleType', 'listStyleImage', 
+			'marginTop', 'marginBottom', 'marginLeft', 'marginRight','orphans', 
+			'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+			'pageBreakAfter', 'pageBreakBefore', 
+			'stroke', 'strokeWidth',
+			'strokeOpacity', 'fillOpacity',
+			'tableLayout', 
+			'textAlign', 'textAnchor','textDecoration', 'textIndent', 'textTransform', 'textShadow',
+			'verticalAlign',
+			'widows', 'width',
+			'position','top','left','bottom','right'],            
+	getRealStyle: function(elm, attributes) {
+		var returnObj = {};
+		var computed = getComputedStyle(elm);
+		for(var i=0; i<attributes.length; i++) {
+			returnObj[attributes[i]] = computed[attributes[i]];
 		}
-		else {
-			searchModule.addTo(map); 
-			quickSearchOn = 1;
-				console.log('quick search is now on');
+		return returnObj;
+	},
+	copyComputedStyle: function(elm, dest, parentStyle, attributes) {
+		parentStyle = parentStyle || {}; 
+		var s = xepOnline.Formatter.getRealStyle(elm, attributes);
+		for ( var i in s ) {
+			var currentCss = s[i];
+
+			// ignore duplicate "inheritable" properties
+			if(parentStyle !== undefined && (parentStyle[i] && parentStyle[i] === currentCss)) { } else { 
+				// The try is for setter only properties
+				try {
+					dest.style[i] = s[i];
+					// `fontSize` comes before `font` If `font` is empty, `fontSize` gets
+					// overwritten.  So make sure to reset this property. (hackyhackhack)
+					// Other properties may need similar treatment
+					if ( i == "font" ) {
+						dest.style.fontSize = s.fontSize;
+					}
+				} catch (e) {}
+			}
+		}
+	},
+	replaceCanvas: function(dest) {
+	    jQuery(dest).find('canvas').each(function(index) {
+			var canvas = this;
+			var src_canvas = jQuery(jQuery(xepOnline.Formatter.__elm)[0]).find('canvas')[index];
+			jQuery('<img src="' + src_canvas.toDataURL() +'"/>').insertAfter(canvas);
+		});
+	},
+	embedLocalImages: function(dest) {
+	    jQuery(dest).find('img').each(function(index) {
+			var img = this;
+			var imageUrl = img.src;
+			if (imageUrl.indexOf(xepOnline.Formatter.getBase()) != -1){
+			     var canvas = document.createElement('canvas');
+	             var ctx = canvas.getContext('2d');
+		         canvas.height = img.height;
+		         canvas.width = img.width;
+	  	         ctx.drawImage(img,0,0, img.width, img.height);
+	  	         var dataURL = canvas.toDataURL();
+	  	         jQuery(img).attr('src', dataURL);
+                canvas = null;
+            }
+		});
+	},
+	computeTableCols: function(dest) {
+		jQuery(dest).find('table').each(function() {
+			var table = this;
+			jQuery(table).find('col,colgroup').each(function() {
+				jQuery(this).attr('xeponline-drop-me',true);
+			});
+
+				var cols = 0;
+				jQuery(jQuery.find('dest td,th',jQuery('tr',table)[0])).each(function(td) { cols += Number((Number(jQuery(td).attr('colspan'))) ? (jQuery(td).attr('colspan')): 1); })
+				var tbody = jQuery('<tbody>');
+				var tr = jQuery('<tr>');
+				jQuery(tbody).append(tr);
+
+				for(var i = 0; i<cols; i++) {
+					jQuery(tr).append('<td style="padding:0; margin:0">&#x200b;</td>');
+				}
+
+				// append tbody after everything else
+				jQuery(table).append(tbody);
+				var widths = [];
+				jQuery(jQuery(jQuery('tr',tbody)[0])).find('td,th').each(function() { 
+					widths.push(jQuery(this).css('width').replace('px',''));
+				});
+
+				// remove any original col groups and widths
+				jQuery(table).find('[xeponline-drop-me=true]').remove();
+				jQuery(table).find('td,th').css('width','');
+
+				var colgroup = jQuery('<colgroup>');
+				jQuery(table).prepend(colgroup);
+				for(var i = 0; i<widths.length;i++) {
+					var col = jQuery('<col>');
+					jQuery(col).attr('width', widths[i]);
+					jQuery(colgroup).append(col);
+				}
+				jQuery(tbody).remove();
+		});
+	},
+	cleanTags: function(PrintCopy) {
+		var result = PrintCopy;
+		for(var i=0; i<xepOnline.Formatter.clean_tags.length;i++) {
+			var regx = new RegExp('(<' + xepOnline.Formatter.clean_tags[i] + '("[^"]*"|[^\/">])*)>', 'g');
+			result = result.replace(regx, '$1/>');
+		}
+		return result;
+	},
+	flattenStyle: function(elm, options) {
+		// parent
+		xepOnline.Formatter.copyComputedStyle(elm, elm, undefined, xepOnline.Formatter.fo_attributes_root);
+		// children
+		jQuery(elm).find('*').each(function(index, elm2) {
+			switch(elm2.tagName) {
+				case 'IFRAME':
+					try {
+						// HACK! selector in iframe goes after [contenteditable] 
+						// this to become an optional sub-selector for content iframe somehow in future
+						var content = jQuery(jQuery(xepOnline.Formatter.__elm).find('iframe[src="' + jQuery(elm2).attr('src') + '"]')[0].contentDocument).find('[contenteditable]');
+						var iflat = jQuery('<div data-xeponline-formatting=\'i-flat\'></div>');
+						iflat.html(content.html());				
+						content.after(iflat);
+						xepOnline.Formatter.flattenStyle(iflat[0]);
+						jQuery(elm2).after(iflat);
+						
+					} catch(e) {}
+				case 'SCRIPT':
+				// ignore these tags
+				break;
+				default:
+					var parentStyle = xepOnline.Formatter.getRealStyle(jQuery(elm2).parent()[0], xepOnline.Formatter.fo_attributes);
+					xepOnline.Formatter.copyComputedStyle(elm2, elm2, parentStyle, xepOnline.Formatter.fo_attributes);				
+				break;
+
+			}
+		});
+		// fix table columns
+		xepOnline.Formatter.computeTableCols(elm);
+		// imbed canvas
+		xepOnline.Formatter.replaceCanvas(elm);
+		// embed local image if set in options
+		if (options.embedLocalImages == 'true') {
+		    xepOnline.Formatter.embedLocalImages(elm);
+		}
+	},
+	getFormTextData: function(PrintCopy) {
+		var data = xepOnline.Formatter.entity_declaration + current_stylesheet + PrintCopy;
+		var encoded = encodeURIComponent(data);
+		if(window.btoa) return btoa(encoded);
+		return encoded;
+	},
+	getFormData: function(PrintCopy, Name, MimeType, FileName, Resolution) {
+		var data = xepOnline.Formatter.entity_declaration + current_stylesheet + PrintCopy;
+		var blob;
+		try
+		{
+			blob = new Blob([data],{ type: xepOnline.Formatter.src_type.xml });
+		}
+		catch(e) 
+		{
+			if(e.name === 'TypeError') {
+				throw new Error('Blob undefined')
+			}
 		}
 
-	});	
-  
+		if(blob === undefined) throw new Error('Blob undefined');
 
- 
-//searchie searchie!
-  
+		var obj = new FormData();
 
-		var parcelPolygon = new L.geoJson();
-  
-  	function runQuery(){
+		obj.append(Name,blob,FileName);
+		obj.append('mimetype', MimeType);
+		obj.append('resolution', Resolution);
+		return obj;
+	},
+	togglePrintMediaStyle: function() {
+		if(jQuery('head style[data-xeponline-formatting]').length > 0) {
+			jQuery('head style[data-xeponline-formatting]').remove();
+			return;
+		}
+		var printrules = [];
+		for(var x=0;x<document.styleSheets.length;x++) { 
+			// ignore media print
+			var skipMedia = false;
+			for(var i = 0; i < xepOnline.MEDIA_IGNORE.length; i++) {
+				if(document.styleSheets[x].href && document.styleSheets[x].href.indexOf(xepOnline.MEDIA_IGNORE[i]) > 0) {
+					skipMedia = true;
+					break;
+				}
+			}
 
-		map.removeLayer(parcelPolygon);
-		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=';
-		query_string = "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descriptio, redev_area, histdist, foreclosed, auction, cartodb_id, the_geom from trenton_master";
-		var input_parc_type = $('#SR_parc_type').val();
-		var input_zoning = $('#SR_zoning').val();
-		var input_owner = $('#SR_owner').val();
-		var input_owner_add = $('#SR_owner_add').val();
-	    var input_address = $('#SR_address').val();
-		var input_count = 0;
-		var whereClause = "";
-		var selections = [];
-		var optionClause = '';
-		var checkedOptions = [];
-		var option_count = 0;
-	
+
+			// try catch - some browsers don't allow to read css stylesheets
+			var rules;			
+			try
+			{
+				if(!document.styleSheets[x].cssRules === null || (document.styleSheets[x].href !== null && document.styleSheets[x].href.indexOf(location.host) === 0)) {
+					skipMedia = true;
+				}
+				if(skipMedia) continue;
+				var rules=document.styleSheets[x].cssRules;
+			} catch(e) {}	
+
+			if(rules) {
+				var rule=[];
+				for(var x2=0;x2<rules.length;x2++) {
+					
+					if(rules[x2].media && rules[x2].media && (rules[x2].media[0] === 'print' || 
+						rules[x2].media && rules[x2].media.mediaText === 'print')) {
+						for(var x3=0;x3<rules[x2].cssRules.length; x3++) {
+							rule.push(rules[x2].cssRules[x3]);
+						}
+					}  else if (rules[x2].parentStyleSheet.media[0] && 
+							rules[x2].parentStyleSheet.media[0] === 'print' ||
+							(rules[x2].parentStyleSheet.media && 
+								rules[x2].parentStyleSheet.media.mediaText === 'print')) {
+						rule.push(rules[x2]);
+					}
+				}
+				for(var x2=0;x2<rule.length;x2++) {
+					printrules.push(rule[x2].cssText);	
+				}
+			}
+		}
+
+		// write print media styles to head
+		var html = '\n<style type="text/css" data-xeponline-formatting="true">\n';
+		for(var x=0; x<printrules.length; x++) {
+			html+='.xeponline-container ' + printrules[x] + '\n';
+		}
+		html += '</style>\n';
+		jQuery('head').append(html);
+	},
+	getFOContainer: function(options) {
+		options 			= options || {};
+		options.pageWidth 	= options.pageWidth || xepOnline.DEFAULTS.pageWidth;
+		options.pageHeight 	= options.pageHeight || xepOnline.DEFAULTS.pageHeight;
+		options.pageMargin 	= options.pageMargin || xepOnline.DEFAULTS.pageMargin;
+
+		var container = jQuery('<div class=\'xeponline-container\'></div>');
+		var margincontainer = jQuery('<div class=\'margin-container\'></div>');
+		container.append(margincontainer);
+		var stylebuilder = '';
+		var stylebuildermargin = '';
+		var fostylebuilder = '';
 		
-		if (input_parc_type == 'ANY'){
-			whereClause = " WHERE ";
-			input_parc_type = "parc_type is not null";
-			input_count = input_count+1;
-			selections[input_count] = input_parc_type;
-			console.log (whereClause, input_parc_type, input_count, selections[input_count]);
+		stylebuilder += 'width: ' 			+ options.pageWidth + '; ';
+		stylebuilder += 'height: ' 			+ options.pageHeight + '; ';
+		stylebuildermargin += 'margin: ' 	+ options.pageMargin + '; ';
+
+		if(options && options.pageMarginTop) {
+			stylebuildermargin += 'margin-top: ' + options.pageMarginTop + '; ';
+		}
+		if(options && options.pageMarginRight) {
+			stylebuildermargin += 'margin-right: ' + options.pageMarginRight + '; ';
+		}
+		if(options && options.pageMarginBottom) {
+			stylebuildermargin += 'margin-bottom: ' + options.pageMarginBottom + '; ';
+		}
+		if(options && options.pageMarginLeft) {
+			stylebuildermargin += 'margin-left: ' + options.pageMarginLeft + '; ';
+		}
+		if(options && options.cssStyle) {
+		    jQuery.each(options.cssStyle, function(key, value) {
+		      jQuery.each(value, function(objkey, objvalue) {
+                stylebuilder += objkey.fromCamel()+ ': ' + objvalue + '; ';
+              });
+            });
+		}
+		if(options && options.foStyle) {
+		    jQuery.each(options.foStyle, function(key, value) {
+		      jQuery.each(value, function(objkey, objvalue) {
+                fostylebuilder += objkey.fromCamel()+ ': ' + objvalue + '; ';
+              });
+            });
+		}
+		container.attr('style', stylebuilder);
+		margincontainer.attr('style', stylebuildermargin);
+		container.attr('fostyle', fostylebuilder);
+		return container;
+	},
+	getBase: function() {
+		var pathname = jQuery(location).attr('pathname').substring(0, jQuery(location).attr('pathname').lastIndexOf('/') + 1);
+		var base = jQuery(location).attr('protocol') + '//' + jQuery(location).attr('hostname') + pathname;
+		return base;
+	},
+	// IE Hack!
+	cleanSVGDeclarations: function(data) {
+		var builder = '';
+
+		var regx = /<svg ("[^"]*"|[^\/">])*>/ig;
+		var match = regx.exec(data);
+		var startIdx = 0;
+		var svgdec_text = 'xmlns="http://www.w3.org/2000/svg"';
+
+		while(match != null) {
+
+			builder = builder || '';
+			builder += data.substring(startIdx, match.index);
+
+			// hack for IE
+			// build replacement opening svg tag, killing duplicate xmlns svg namespace decleration
+			builder += '<svg';
+			// add back name values
+			var svgdec_flag = false;
+			var namevalues = match[0].match(/([^< =,]*)=("[^"]*"|[^,"]*)/ig);
+			for(var s = 0; s<namevalues.length; s++) {
+				if(namevalues[s] === svgdec_text && svgdec_flag) { } else {
+					builder += ' ' + namevalues[s];
+				}
+				svgdec_flag = namevalues[s] === svgdec_text || svgdec_flag;
+			}
+			builder += '>';
+
+			data = data.substring(match.index + match[0].length);
+			regx = /<svg ("[^"]*"|[^\/">])*>/ig;
+			match = regx.exec(data);
+		}
+
+		return builder += (data || '');
+	},
+	xep_chandra_service: 'http://xep.cloudformatter.com/Chandra.svc/genpackage',
+	xep_chandra_service_AS_PDF: 'http://xep.cloudformatter.com/Chandra.svc/genfile',
+	xep_chandra_service_page_images: 'http://xep.cloudformatter.com/Chandra.svc/genpageimages',
+	entity_declaration:'<!DOCTYPE div [  <!ENTITY % winansi SYSTEM "http://xep.cloudformatter.com/doc/XSL/winansi.xml">  %winansi;]>',
+	xsl_stylesheet_declaration: '<?xml-stylesheet type="text/xsl" href="http://xep.cloudformatter.com/doc/XSL/xeponline-fo-translate-2.xsl"?>',
+	svg_xsl_stylesheet_declaration: '<?xml-stylesheet type="text/xsl" href="http://xep.cloudformatter.com/doc/XSL/xeponline-svg-translate.xsl"?>',
+	src_type: { xml: 'text/xml'},
+	mime_type: { 
+	   pdf: 'application/pdf', 
+	   svg: 'image/svg+xml', 
+	   xps:'application/vnd.ms-xpsdocument',
+	   ps: 'application/postscript',
+	   afp: 'application/afp',
+	   xep: 'application/xep',
+	   png: 'image/png'
+	},
+	/* options	
+		{
+			pageWidth: "8.5in", 				// reserved for the FO region-body (next 7)
+			pageHeight: "11in", 
+			pageMargin: ".25in", 
+			pageMarginTop: "1in",
+			pageMarginRight: "1in",
+			pageMarginBottom: "1in",
+			pageMarginLeft: "1in",
+			pageMediaResource: "name_of_css_stylesheet",
+			mimeType: ("application/pdf<default>"|"image/svg+xml"),
+			render: ("none"|"newwin<default>"|embed"|"download<default IE>"),
+			cssStyle: {							// puts css style attributes on the root, ex. fontSize:14px
+						cssStyleName: 'value', ...
+					},
+			foStyle: {							// puts fo style attributes on the root, ex. fontSize:14px
+						foStyleName: 'value', ...
+					}			
+		}
+	*/
+	__format: function(ElementIDs, options) {
+		options = options || {};
+		options.render = (options.render === undefined) ? 'newwin' : options.render;
+		options.mimeType = (options.mimeType === undefined) ? xepOnline.Formatter.mime_type.pdf : options.mimeType;
+		options.filename = (options.filename === undefined) ? 'document' : options.filename;
+		options.resolution = (options.resolution === undefined) ? '120' : options.resolution;
+		
+		//Record the height of the target
+		current_height = jQuery('#' + ElementIDs[0]).height();
+		
+		//Set the stylesheet to use
+		current_stylesheet = options.srctype=='svg' ? xepOnline.Formatter.svg_xsl_stylesheet_declaration : xepOnline.Formatter.xsl_stylesheet_declaration;
+		
+		if(xepOnline.IE() || xepOnline.mobilecheck()) {
+			options.render = (options.mimeType.substring(0,5) == 'image') ? options.render : 'download';
+		}
+
+		 var printcopy = '';
+		jQuery(ElementIDs).each(function(index, ElementID){
+		   xepOnline.Formatter.__elm = jQuery('#' + ElementID)[0];
+		   if(!xepOnline.Formatter.__elm) {
+		   	throw new Error('Missing or invalid selector');
+		   }
+
+		   xepOnline.Formatter.__clone = jQuery(xepOnline.Formatter.__elm)[0].outerHTML;
+		   xepOnline.Formatter.__container = xepOnline.Formatter.getFOContainer(options);
+
+			jQuery('#' + ElementID).after(jQuery(xepOnline.Formatter.__container));
+			jQuery(xepOnline.Formatter.__clone).appendTo(jQuery(xepOnline.Formatter.__container).children(1));		
+
+		   xepOnline.Formatter.togglePrintMediaStyle();
+		   xepOnline.Formatter.flattenStyle(jQuery(xepOnline.Formatter.__container)[0], options);
+		   printcopy = printcopy + xepOnline.Formatter.cleanTags(jQuery(xepOnline.Formatter.__container)[0].outerHTML);
+		   xepOnline.Formatter.Clear();
+		});
+
+		if(options.render === 'none') {
+			return false;
+		}
+		if(options.render === 'embed') {
+			xepOnline.Formatter.__container.attr('data-xeponline-embed-pending', 'true');
+		}
+		// fix IE double xmlns declerations in SVG
+		if(xepOnline.IE()) {
+			printcopy = xepOnline.Formatter.cleanSVGDeclarations(printcopy);
+		}
+		//Kevin hack for now, stuff the whole thing in a document div
+		var nss = "";
+		jQuery.each(options.namespaces || [], function(objkey, objvalue) {
+                nss += objvalue + ' ';
+        });
+		printcopy = '<div base="' + xepOnline.Formatter.getBase() + '" class="xeponline-document" ' + nss + '>' + printcopy + '</div>';
+
+		var blob;
+		if(options.render !== 'download') {
+			try 
+			{
+				blob = xepOnline.Formatter.getFormData(printcopy, 'xml', options.mimeType, 'document.xml', options.resolution);
+			} catch(e) 
+			{
+				// switch render to download if blob undefined
+				if(e.message === 'Blob undefined') {
+					options.render = 'download';					
+				} else {
+					throw e;
+				}
+			}
+		}
+        // set temp mimetype for display
+        current_mimetype = options.mimeType;
+		if(options.render === 'download') {
+			jQuery('body').append('<form style="width:0px; height:0px; overflow:hidden" enctype=\'multipart/form-data\' id=\'temp_post\' method=\'POST\' action=\'' + xepOnline.Formatter.xep_chandra_service_AS_PDF + '\'></form>');		
+			jQuery('#temp_post').append('<input type=\'text\' name=\'mimetype\' value=\'' + options.mimeType + '\'/>');
+			jQuery('#temp_post').append('<textarea name=\'xml\'>' + xepOnline.Formatter.getFormTextData(printcopy) + '</textarea>');
+			jQuery('#temp_post').append('<input type=\'text\' name=\'filename\' value=\'' + options.filename + '\'/>');
+			jQuery('#temp_post').submit();
+			jQuery('#temp_post').remove();
+// DO NOT USE. We are implementing SOAP-based server support also. It is functional but this server is an Azure server not active at this time.
+		} else if (options.render === 'soap') {	
+		    var productServiceUrl = 'http://52.8.13.8:6577/fairy'; 
+            var soapMessage =
+'<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" \
+    xmlns:fairy="http://52.8.13.8:6577/fairy"> \
+    <SOAP-ENV:Header/> \
+    <SOAP-ENV:Body> \
+        <fairy:format SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"> \
+            <in0>'+ xepOnline.Formatter.getBase() + '</in0> \
+            <in1>' + utf8ToBase64(xepOnline.Formatter.entity_declaration + current_stylesheet + printcopy) + '</in1> \
+        </fairy:format> \
+    </SOAP-ENV:Body> \
+</SOAP-ENV:Envelope>';
+            jQuery.ajax({
+            url: productServiceUrl,
+            type: "POST",
+            dataType: "xml",
+            data: soapMessage,
+            complete: xepOnline.Formatter.__soapBackSuccess,
+            contentType: "text/xml; charset=\"UTF-8\""
+            });
+		} else {
+			jQuery.ajax({
+				type: "POST",
+				url: current_mimetype == "image/png" || current_mimetype == "image/jpg" || current_mimetype == "image/gif" ? xepOnline.Formatter.xep_chandra_service_page_images : xepOnline.Formatter.xep_chandra_service,
+				processData: false,
+				contentType: false,
+				data: blob,
+				success: current_mimetype == "image/png" || current_mimetype == "image/jpg" || current_mimetype == "image/gif" ? xepOnline.Formatter.__processImages : xepOnline.Formatter.__postBackSuccess,
+				error: xepOnline.Formatter.__postBackFailure
+			});
+		}
+		return false; 
+	},	
+	
+	Format: function(ElementID, options) {
+		var items;
+		if(jQuery.isArray(ElementID)) {
+			items = ElementID;
+		} else {
+			items = [ ElementID ];
+		}
+		return xepOnline.Formatter.__format(items, options);
+	},
+	// deprecated - use Format 
+	FormatGroup: function(ElementID, options) {
+		return xepOnline.Formatter.Format(ElementID, options);
+	},
+	Clear: function() {
+		if(jQuery(xepOnline.Formatter.__container).length===0 || 
+			jQuery(xepOnline.Formatter.__container).attr('data-xeponline-embed-pending') === 'true')
+			return;			
+
+		jQuery(xepOnline.Formatter.__container).remove();
+		xepOnline.Formatter.togglePrintMediaStyle();
+	},
+	__soapBackSuccess: function(xmlHttpRequest, status) {
+		var base64PDF = jQuery(xmlHttpRequest.responseXML).find('formatReturn').text();
+		var objbuilder = '';
+		objbuilder += ('<object width="100%" height="100%" data="data:application/pdf;base64,');
+		objbuilder += (base64PDF);
+		objbuilder += ('" type="application/pdf" class="internal">');
+		objbuilder += ('<embed src="data:application/pdf;base64,');
+		objbuilder += (base64PDF);
+		objbuilder += ('" type="application/pdf" />');
+		objbuilder += ('</object>');
+
+		if(jQuery(xepOnline.Formatter.__container).attr('data-xeponline-embed-pending') === 'true') {			
+			jQuery(xepOnline.Formatter.__elm).html(objbuilder);
+			jQuery(xepOnline.Formatter.__elm).css({'height': xepOnline.DEFAULTS.pageHeight });
+			jQuery(xepOnline.Formatter.__container).remove();
+		} else {
+			// TODO: try catch window open "pop-up blocker"
+			var win = window.open("","_blank","titlebar=yes");
+			win.document.title = "XEPOnline PDF Result";
+			win.document.write('<html><body>');
+			win.document.write(objbuilder);
+			win.document.write('</body></html>');
+			layer = jQuery(win.document);
+		}
+	},
+	__postBackSuccess: function(Response) {
+		var base64 = jQuery(Response).find("Result").text();
+		
+		if (current_mimetype == 'image/svg+xml'){
+		  if(jQuery(xepOnline.Formatter.__container).attr('data-xeponline-embed-pending') === 'true'){
+		        var parser = new DOMParser();
+                var dom = parser.parseFromString(bufferToBinaryString(base64ToBuffer(base64)).replace('ï»¿',''), "text/xml");
+                jQuery(xepOnline.Formatter.__elm).html('');
+                document.getElementById(jQuery(xepOnline.Formatter.__elm).attr('id')).appendChild(dom.documentElement);
+		  }
+		  else{
+		      var win = window.open("","_blank","titlebar=yes");
+			  win.document.title = "XEPOnline Result";
+			  win.document.write('<html><head>');
+			  jQuery.each(jQuery("link[href*='googleapis']"),function(index,value){
+			      win.document.write(value.outerHTML);
+			  });
+			  win.document.write('</head><body height="100%"><div id="target" style="height:100%;overflow-y:auto">');
+			  win.document.write('</div></body></html>');
+			  var parser = new DOMParser();
+              var dom = parser.parseFromString(bufferToBinaryString(base64ToBuffer(base64)).replace('ï»¿',''), "text/xml");
+              win.document.getElementById('target').appendChild(dom.documentElement);
+              layer = jQuery(win.document);
+		  }
 		}
 		else{
-			whereClause = " WHERE ";
-			input_parc_type = "parc_type = '" + input_parc_type + "'";
-			input_count = input_count+1;
-			selections[input_count] = input_parc_type;
-			console.log (whereClause, input_parc_type, input_count, selections[input_count]);
+    		var objbuilder = '';
+    		objbuilder += ('<object width="100%"');
+    	    objbuilder += (' height="');
+    	    if(jQuery(xepOnline.Formatter.__container).attr('data-xeponline-embed-pending') === 'true'){
+    	       objbuilder += (current_height);
+    	    }
+    	    else{
+    	       objbuilder += ('100%'); 
+    	    }
+      		objbuilder += ('" data="data:');
+      		objbuilder += (current_mimetype);
+      		objbuilder += (';base64,');
+      		objbuilder += (base64);
+      		objbuilder += ('" type="');
+      		objbuilder += (current_mimetype)
+      		objbuilder += ('" class="internal">');
+      		objbuilder += ('<embed src="data:');
+      		objbuilder += (current_mimetype);
+      		objbuilder += (';base64,');
+      		objbuilder += (base64);
+      		objbuilder += ('" type="');
+      		objbuilder += (current_mimetype);
+      		objbuilder += ('" />');
+      		objbuilder += ('</object>');
+		    if(jQuery(xepOnline.Formatter.__container).attr('data-xeponline-embed-pending') === 'true'){
+		          jQuery(xepOnline.Formatter.__elm).html(objbuilder);
+		    }
+		    else {
+		         var win = window.open("","_blank","titlebar=yes");
+			     win.document.title = "XEPOnline Result";
+			     win.document.write('<html><head>');
+			     win.document.write('</head><body height="100%"><div id="target" style="height:100%;overflow-y:auto">');
+			     win.document.write(objbuilder);
+			     win.document.write('</div></body></html>');
+			     layer = jQuery(win.document);
+		    }
 		}
-		
-		if (input_zoning != 'ANY'){
-			input_zoning = "descriptio = '" + input_zoning + "'";
-			input_count = input_count+1;
-			selections[input_count] = input_zoning;
-			console.log (whereClause, input_zoning, input_count, selections[input_count]);
-			}
-		
-		if (input_owner != "") {
-			whereClause = " WHERE ";
-			input_owner = input_owner.toUpperCase();
-			input_owner = "owner ilike '%"+ input_owner + "%'";
-			input_count = input_count+1;
-			selections[input_count] = input_owner;
-			console.log (whereClause, input_owner, input_count, selections[input_count]);
-		}
-
-		if (input_owner_add != "") {
-			whereClause = " WHERE ";
-			input_owner_add = input_owner_add.toUpperCase();
-			var parse_ownadd_array = input_owner_add.split(" ");
-			
-			if (parse_ownadd_array.length > 0) {
-				input_owner_add = "ownstreet like '%"+ parse_ownadd_array[0] +"%' or owncity like '%"+ parse_ownadd_array[0] + "%'";
-				if (parse_ownadd_array.length > 1) {
-						for (i in parse_ownadd_array.length, i=1, i++) {
-				input_owner_add = input_owner_add + " OR ownstreet like '%"+ parse_ownadd_array[i] +"%' or owncity like '%"+ parse_ownadd_array[i] + "%')";
-				}
-				}
-				}
-			input_owner_add = "(" + input_owner_add + ")";
-			input_count = input_count+1;
-			selections[input_count] = input_owner_add;
-			console.log (whereClause, input_owner_add, input_count, selections[input_count]);
-		}
-
-		
-		if (input_address != "") {
-			//add scrubber for North, South, etc. and street type
-			whereClause = " WHERE ";
-			input_address = input_address.toUpperCase();
-			input_address = "address ilike '%" + input_address + "%'";
-			input_count = input_count+1;
-			selections[input_count] = input_address;
-			console.log (whereClause, input_address, input_count, selections[input_count]);
-		}
-		
-		if (document.getElementById("SR_class").checked) {
-			whereClause = " WHERE ";
-			input_count = input_count+1;
-			selections[input_count] = "class = '2'";
-		}
-		
-		if ((document.getElementById("dumping").checked) || (document.getElementById("trash").checked) || (document.getElementById("xs").checked) || (document.getElementById("dilapidated").checked) || (document.getElementById("unsecured").checked) || (document.getElementById("animals").checked) || (document.getElementById("unmaintained").checked) || (document.getElementById("weeds").checked)) {
-			whereClause = " WHERE ";
-			//add dropdown AND/OR operator!
-			input_count = input_count+1;
-			
-			if (document.getElementById("dumping").checked) {
-			checkedOptions[option_count] = "DUMPING";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("trash").checked) {
-			checkedOptions[option_count] = "TRASH";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("xs").checked) {
-			checkedOptions[option_count] = "XS";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("dilapidated").checked) {
-			checkedOptions[option_count] = "DILAPIDATED";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("unsecured").checked) {
-			checkedOptions[option_count] = "UNSECURED";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("animals").checked) {
-			checkedOptions[option_count] = "ANIMALS";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("unmaintained").checked) {
-			checkedOptions[option_count] = "UNMAINTAINED";
-			option_count = option_count + 1;
-			}
-			
-			if (document.getElementById("weeds").checked) {
-			checkedOptions[option_count] = "WEEDS";
-			option_count = option_count + 1;
-			}
-			
-			if (option_count > 0) {
-			optionClause = "CONDITIONS ilike '%" + checkedOptions[0] + "%'";
-			for (i=1; i<option_count; i++) {
-				optionClause = optionClause + " OR CONDITIONS ilike '%" + checkedOptions[i] + "%'";
-			}
-			}
-				
-			selections[input_count] = optionClause;
-			console.log (whereClause, optionClause, input_count, selections[input_count]);
-		}
-		
-		query_string = query_string + whereClause + selections[1];
-		console.log(query_string);
-		
-		if (input_count > 1) {
-		for (i=2; i <= input_count; i++) {
-		query_string = query_string + " AND " + selections[i];
-		}
-		
-		}
-				cartoURL = cartoURL + encodeURI(query_string);
-                console.log('calling url = '+ cartoURL);
-
-	  }
-
-	function mapSelection()
-	{
-		hideTable();
-		var spinner = new Spinner().spin(spinBox);
-		$('#spinBox').show();
-	
-		runQuery();
-		
-
-			$.getJSON(cartoURL, function(data) {
-			
-				parcelPolygon = L.geoJson(data, {
-					onEachFeature: function (feature, layer) {
-				 				var bounds = layer.getBounds();
-								var center = bounds.getCenter();
-				 				var propAdd = feature.properties.address;
-								var cartodbID = feature.properties.cartodb_id;
-								var formURL="https://docs.google.com/forms/d/11QPK0sF29VREQR3ke-Td3EUd1LoCh9UbHR8um8xSOrY/viewform?entry.1233008467="+propAdd+"&entry.492807532="+cartodbID+"&entry.935525454="+center+"&entry.1771840456&entry.1915372513&entry.2060863861&entry.1480924992&entry.1569579456";
-				
-				 
-					var popupContent = "<b>"+ feature.properties.address + "</b><br>"+ feature.properties.parc_type+"<hr><b><a target = 'blank' href='"+ formURL + "'>REPORT AN ISSUE</a></b>" +"<hr><b>OWNER</B><BR>"+feature.properties.owner+"<br>"+feature.properties.ownstreet+"<br>"+feature.properties.owncity+"<br><br><B>CONDITIONS</B>: "+feature.properties.conditions+"<br><B>FIELD NOTES</B>: "+feature.properties.notes+"<hr><B>TAX INFO</B><BR>TAXES: $"+feature.properties.taxes+"<br>ASSESSED: $"+feature.properties.totalassmt +"<br>LIENS (CITY): $"+feature.properties.city_liens+"<br>LIENS (PRIVATE): $"+feature.properties.priv_liens+"<hr><b>LAND USE INFO</B><BR>REDEV'T AREA: "+feature.properties.redev_area+"<br>ZONING: "+feature.properties.zone_abrv+"&nbsp"+feature.properties.descriptio+"<hr><b>ACTIONS</B><BR>TAX FORECLOSURE: "+feature.properties.foreclosed + "<br>CITY AUCTION: "+feature.properties.auction;
-					layer.bindPopup(popupContent);
-					}
-				});
-				map.fitBounds(parcelPolygon.getBounds());
-				parcelPolygon.addTo(map);
-				$('#spinBox').hide();
-	 
-			});
-			queryHighlightOn=1;
-			deselectButton.addTo(map);
-			deselectButton.on('click', function () {
-				clearSelection();
-			});
-	}
-    	
-	
-	
-	function clearSelection()
-	{
-		hideTable();
-		query_string = '';
-		cartoURL = '';
-		map.removeLayer(parcelPolygon);
-		advanced_search.reset();
-		queryHighlightOn=0;
-		deselectButton.removeFrom(map);
-		map.setView([40.224, -74.76], 15);
-		
-     }
-
-	function downloadSelection()
-	{
-		runQuery();
-		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=CSV&filename=restoring_trenton_query.csv&q=';
-		cartoURL = cartoURL + encodeURI(query_string);
-		window.open(cartoURL);
-     
-		}
-		
-	function makeTable()
-	{
-		runQuery();
-		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=CSV&filename=restoring_trenton_query.csv&q=';
-		cartoURL = cartoURL + encodeURI(query_string);
-
-		document.getElementById('queryTable').innerHTML = config.table_base;
-		var spinner = new Spinner().spin(spinBox);
-		$('#spinBox').show();
-		
-		d3.text(cartoURL, function(data) {
-                var parsedCSV = d3.csv.parseRows(data);
-
-                var container = d3.select("#queryTable")
-                    .append("table")
-
-                    .selectAll("tr")
-                        .data(parsedCSV).enter()
-                        .append("tr")
-
-                    .selectAll("td")
-                        .data(function(d) { return d; }).enter()
-                        .append("td")
-                        .text(function(d) { return d; });
-				
-				$('#spinBox').hide();
-            	
-			});
-		document.getElementById('map').style.display = 'none';	
-		document.getElementById('queryTable').style.display = 'block';
-
-	}
-	function hideTable()
-	{
-		document.getElementById('queryTable').style.display = 'none';
-		document.getElementById('map').style.display = 'block';
+	},
+	__processImages: function(Response) {
+	    var Pages = jQuery(Response).find("Pages").children();
+	    
+	     if(jQuery(xepOnline.Formatter.__container).attr('data-xeponline-embed-pending') === 'true'){
+	         jQuery(xepOnline.Formatter.__elm).html('');
+             jQuery.each(Pages,function(index,value){
+			     jQuery(xepOnline.Formatter.__elm).append('<img style="border:1px solid black" height="100%" src="data:image/png;base64,' + jQuery(value).text() + '"/>');
+			 });
+	     }
+	     else {
+                 var win = window.open("","_blank","titlebar=yes");
+			     win.document.title = "XEPOnline Result";
+			     win.document.write('<html><head>');
+			     win.document.write('</head><body height="100%"><div id="target" style="height:100%;overflow-y:auto">');
+			     jQuery.each(Pages,function(index,value){
+			         win.document.write('<img style="border:1px solid black" src="data:' + current_mimetype + ';base64,' + jQuery(value).text() + '"/>');
+			     });
+			     win.document.write('</div></body></html>');	         
+	     }
+	},
+	__postBackFailure: function (request, status, error){
+	        var req = jQuery(request.responseText);
+	        var win = window.open("","_blank","titlebar=yes, width=800, height=500");
+		win.document.title = "XEPOnline Error";
+		win.document.write(request.responseText);
 	}
 
-function crimeQuery() {
-
-	crimeSQL = '';
-	var crimeYearVariables = $('input:checkbox:checked.year').map(function () {
-	  return this.id;
-	}).get();
-
-	var crimeTypeVariables = $('input:checkbox:checked.crimecat').map(function () {
-	  return this.id;
-	}).get();
-
-	var typeSQL = '';
-	var yearSQL = '';
-	var andClause = '';
-	
-	if ((crimeTypeVariables.length > 0) || (crimeYearVariables.length > 0)) {
-				crimeSQL = crimeSQL + ' WHERE';
-	}
-
-	if (crimeYearVariables.length > 0) {
-		yearSQL = " (year = '"+crimeYearVariables[0]+"'";
-		if (crimeYearVariables.length > 1) {
-			for (i=1; i<=crimeYearVariables.length-1; i++) {
-				yearSQL = yearSQL + " OR year ='"+crimeYearVariables[i]+"'";
-				}
-			}
-		yearSQL = yearSQL+")";
-	}
-
-	if (crimeTypeVariables.length > 0) {
-	
-		if (crimeYearVariables.length > 0){
-			andClause = " AND";
-		}
-		typeSQL = typeSQL + " (crime_cat ilike '%"+crimeTypeVariables[0]+"%'";
-			for (i=1; i<=crimeTypeVariables.length-1; i++) {
-				typeSQL = typeSQL + " OR crime_cat ilike'%"+crimeTypeVariables[i]+"%'";
-				}
-		 typeSQL = typeSQL + ")";
-			
-	}
-
-	crimeSQL = crimeSQL + yearSQL + andClause + typeSQL;
-}	
-
-function drawCrime() {
-
-	map.removeLayer(crimeCluster);
-	map.removeLayer(crimeHeat);
-	map.removeLayer(ngbhdLayer);
-	crimeCoords = [];
-	crimeCounter = 0;
-
-	
-crimeQuery();	
-
-console.log(crimeSQL);
-
-var spinner = new Spinner().spin(spinBox);
-$('#spinBox').show();
-cartoURL_crimeData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM crime_master" + crimeSQL);
-console.log(cartoURL_crimeData);
-
-	crimeCluster = new L.markerClusterGroup(
-	{
-			disableClusteringAtZoom: 16 ,
-			showCoverageOnHover: false,
-			iconCreateFunction: function (cluster) {
-				var markers = cluster.getAllChildMarkers();
-				var html = '<div class="circle">' + markers.length + '</div>';
-				return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32,32) });
-			}
-		});
-		$.getJSON(cartoURL_crimeData,
-            function(data) {
-			
-	        crimeData = L.geoJson(data, {				
-				style: function(feature) {
-					switch (feature.properties.crime_cat) {
-						case 'Larceny Theft': return {fillColor: "#FFFF00"};
-						case 'Aggravated Assualt': return {fillColor: "#ff0000"};
-						case 'Robbery': return {fillColor: "#FF66FF"};
-						case 'Motor Vehicle Theft': return {fillColor: "#FF9966"};
-						case 'Burglary': return {fillColor: "#660033"};
-						case 'Rape': return {fillColor: "#CC0066"};
-						case 'Arson': return {fillColor: "#FF9900"};
-						case 'Homicide': return {fillColor: "#FF3300"};
-					}
-				},
-				pointToLayer: function(feature, latlng) {
-					return new L.CircleMarker(latlng, {radius: 10, fillOpacity: 0.9, color:"#fff"});
-				},
-
-				onEachFeature: function (feature, layer) {
-							
-				var crimePopup = "<b>"+ feature.properties.crime_cat.toUpperCase() +"</b>" +
-				"<br><b>Location:</b> "+feature.properties.location+
-				"<br><B>Month/Year</b>: "+feature.properties.month + " " + feature.properties.year + 
-				"<hr>"+
-				"<b>Charge:</b> " + feature.properties.charge + 
-				"<hr>"+
-				"<b>Neighborhood: </b>" + feature.properties.ngbhd + 
-				"<br><b>Block: </b>" + feature.properties.block	;
-				layer.bindPopup(crimePopup);
-				crimeCoords.push([feature.geometry.coordinates[1],feature.geometry.coordinates[0]]);
-				crimeCounter++;
-				}
-			});
-				$('#spinBox').hide();
-				crimeCluster.addLayer(crimeData);
-				document.getElementById('crimeQueryResult').innerHTML = "<b># OF INCIDENTS FOUND: <span style='background-color:red;color:white'> &nbsp" +crimeCounter+ "&nbsp</span>";	
-		});
-		
-		if (document.getElementById("incidents").checked) {
-			crimeCluster.addTo(map);
-		}
-		
-		if (document.getElementById("heatmap").checked) {
-			crimeHeatmap();
-		}
-		
-		if (!document.getElementById("incidents").checked) {
-			map.removeLayer(crimeCluster);
-		}
-
-	document.getElementById('crimeQueryResult').style.display = 'block';
 }
-
-
-function loadCrimeInterface() {
-	dashboardSidebar.setContent(config.crimeSidebar_content);
-	if (!dashboardSidebar.isVisible()) {
-		dashboardSidebar.toggle();
-		}
-	if ($.contains( document.crimeSidebarButton, document.map )!=='true'){
-		crimeSidebarButton.addTo(map);
-		crimeButtonOn = 1;
-	};
-	
-	if (ngbhdButtonOn !=0){
-		ngbhdSidebarButton.removeFrom(map);
-		ngbhdButtonOn = 0;
-	};
-	
-	map.setZoom(13);
-	drawCrime();
-
-}
-
-function crimeHeatmap() {
-
-			dynamiczoomspecs();
-
-			$.getJSON(cartoURL_crimeData,
-				function(data) {
-				   
-				var heatIntensity = 1;
-				if (crimeCounter < 1000) {
-					heatIntensity = 1/(2000*crimeCounter);
-				}
-				
-				else if (crimeCounter >= 1000 && crimeCounter < 3000){
-					heatIntensity= 3*(1/crimeCounter);
-					}
-				
-				else if (crimeCounter >= 3000 && crimeCounter < 5000){
-					heatIntensity= 10*(1/crimeCounter);
-					}
-					
-				else if (crimeCounter >= 5000 && crimeCounter < 10000){
-					heatIntensity= .005;
-					}
-				
-				else {
-				    heatIntensity = .02;
-				}
-				
-				console.log("crimeCounter = " + crimeCounter + " and heatIntensity = "+ heatIntensity);
-					crimeHeat = L.heatLayer(crimeCoords, {radius: relsize, blur: relsize, max:heatIntensity}).addTo(map);
-					
-				});
-			}
-
- 			function dynamiczoomspecs()
-			{	
-				var currzoom = map.getZoom();
-				if (currzoom < 12) { relsize = 2; }
-				if (currzoom >= 12) {
-					relsize = (currzoom - 10)*2.2;
-				}
-				crimeHeat.setOptions({radius:relsize, blur:relsize});
-				console.log('currzoom = '+currzoom+' and relsize = '+relsize);
-			}
-	
-map.on('zoomend', function(e){
-	console.log('map zoomed');
-	if ($.contains( document.crimeHeat, document.map )!=='false'){
-		dynamiczoomspecs();
-		crimeHeat.redraw();
-	}
-	});	
-
-var ngbhdSidebar_content ='';	
-var selectedIndicator = 'COMPOSITE';
-
-function loadNgbhdInterface() {
-	dashboardSidebar.setContent(config.ngbhdSidebar_content);
-	if (!dashboardSidebar.isVisible()) {
-		dashboardSidebar.toggle();
-		}
-	if ($.contains( document.ngbhdSidebarButton, document.map )!=='true'){
-		ngbhdSidebarButton.addTo(map);
-		ngbhdButtonOn = 1;
-	};
-	map.removeLayer(ngbhdLayer);
-	
-	map.removeLayer(crimeCluster);
-	map.removeLayer(crimeHeat);
-	
-	if (crimeButtonOn != 0){
-		crimeSidebarButton.removeFrom(map);
-		crimeButtonOn = 0;
-		};
-	
-	map.setZoom(13);
-
-	ngbhdSidebar_content = "<br>This is the interactive data portal for the <a style = 'text-decoration: none; font-weight:bold; color:#FF6600' 'href = 'http://www.restoringtrenton.org/#!neighborhood-conditions-study/zqams'>Neighborhood Conditions Study</a>. More details and the full report are <a style = 'text-decoration: none; font-weight:bold; color:#FF6600' href = 'http://www.restoringtrenton.org/#!neighborhood-conditions-study/zqams'>here</a>. <br><br><b>HOW THIS WORKS</B><br><br><li>You're currently seeing the <b>overall market conditions</b> -- a composite score we calculated for each neighborhood based on a bunch of indicators.</li><br><li>Click on a <b>neighborhood</b> to see its overall profile and a table of those indicators.</li><br><li>Click on an <b>indicator</b> to see a map of how different neighborhoods compare on that particular indicator. Scrolling over the map will show you the details for that indicator in each neighborhood.</li><br><li>Some indicators will also display a <b>chart</b> where you can see the trends for that indicator in the neighborhood over time.</li><br><li><b>Export</b> your dashboard by clicking the handy dandy .pdf button near the neighborhood's name.</li>"; 
-	document.getElementById("ngbhd_query_form").innerHTML = ngbhdSidebar_content;
-	
-	drawNgbhds();
-}
-
-
-function refreshNgbhds() {
-	map.removeLayer(ngbhdLayer);
-	drawNgbhds();
-}
-
-//setting up the functions that call the chart
-var chartYears = [];
-var chartValues = [];
-var chartTitle = '';
-var yAxisTitle = '';
-var chartType = '';
-var seriesName = '';
-var chartSeries = [];
-
-
-function callVac() {
-	selectedIndicator = 'VACANCY';
-	chartValues=[];
-	document.getElementById('chartbox').innerHTML = '';
-	refreshNgbhds();
-}
-
-function callHo() {
-	selectedIndicator = 'HOMEOWNERSHIP';
-	chartValues=[];
-	document.getElementById('chartbox').innerHTML = '';
-	refreshNgbhds();
-}
-
-function callMSP() {
-	chartValues=[];
-	selectedIndicator = 'SALE PRICE';
-	chartYears=['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013'];
-		for (i = 0; i<=arguments.length-1; i++) {
-			chartValues[i]=arguments[i];
-		}
-		console.log(chartYears);
-		console.log(chartValues);
-	chartTitle='median sales price';
-	chartType='line';
-	yAxisTitle='$ 000s';
-	seriesName = 'median sales price'
-	chartSeries = [{name: seriesName, data: chartValues, lineWidth:4, marker:{radius:2}, color:'#FF9933'}];
-	makeChart();
-	refreshNgbhds();
-}
-
-function callDOM() {
-	chartValues=[];
-	selectedIndicator = 'SALE PRICE';
-	chartYears=['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014'];
-		for (i = 0; i<=arguments.length-1; i++) {
-			chartValues[i]=arguments[i];
-		}
-	chartTitle='median sales price';
-	chartType='line';
-	yAxisTitle='$ 000s';
-	seriesName = 'median days on market'
-	chartSeries = [{name: seriesName, data: chartValues, lineWidth:4, marker:{radius:2}, color:'#FF9933'}];
-	makeChart();
-	refreshNgbhds();
-}
-
-function callIP() {
-	chartValues=[];
-	selectedIndicator = 'INVESTORS';
-	chartYears=['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013'];
-		for (i = 0; i<=arguments.length-1; i++) {
-			chartValues[i]=parseInt(100*arguments[i]);
-		}
-		chartType='line';
-	seriesName = '% of home sales to absentee investors'
-	chartSeries = [{name: seriesName, data: chartValues, lineWidth:4, marker:{radius:2}, color:'#FF9933'}];
-	makeChart();
-	refreshNgbhds();
-}
-
-function callForc() {
-	chartValues =[];
-	selectedIndicator = 'FORECLOSURE';
-	chartYears=['2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014'];
-		for (i = 0; i<=arguments.length-1; i++) {
-			chartValues[i]=parseInt(arguments[i]*100);
-		}	
-	chartType='line';
-	chartTitle='home foreclosures';
-	seriesName = '% of all homes foreclosed';
-	chartSeries = [{name: seriesName, data: chartValues, lineWidth:4, marker:{radius:2}, color:'#FF9933'}];
-	makeChart();
-	refreshNgbhds();
-}
-
-function callTaxDel() {
-	selectedIndicator = 'TAX DELINQUENCY';
-	chartValues=[];
-	document.getElementById('chartbox').innerHTML = '';
-	refreshNgbhds();
-}
-
-function callTaxLien() {
-	selectedIndicator = 'TAX LIENS BOUGHT';
-	chartValues=[];
-	document.getElementById('chartbox').innerHTML = '';
-	refreshNgbhds();
-}
-
-function callCrime() {
-	selectedIndicator = 'VIOLENT CRIME';
-	chartValues=[];
-	document.getElementById('chartbox').innerHTML = '';
-	refreshNgbhds();
-}
-
-function callComp() {
-	selectedIndicator = 'COMPOSITE';
-	chartValues=[];
-	document.getElementById('chartbox').innerHTML = '';
-	chartValues=[1,2,4,5];
-	refreshNgbhds();
-}
-
-		
-			dashboardSidebar.update = function(props) {
-				selNgbhd = props.nsa;
-				ngbhdSidebar_content = 
-					"<button class='btn-primary' id='export_as_pdf' style='float: right; padding-left:7px; padding-right:7px;font-family:Open Sans;font-weight:bold' onclick='javascript:exportPDF();'><i class='fa fa-file-pdf-o fa-2x'></i></button>" +
-					"<h2>" + props.nsa.toUpperCase() + "</h2>" +
-					"<hr>" +
-					"<div id='tierband' style='background-color:#85CECE'><a style='color:#ffffff' href='javascript:callComp()'>HOUSING MARKET</a>: "+ props.comp_class.toUpperCase() + "</div>" + 
-					"<div id='chartbox'></div>" +
-					"<div id='tableContainer'>" +
-					"<table style='width:100%; border:none;text-align:right'>" +
-					"<tr><td style='text-align:left'><b>INDICATOR</b><br><span style='font-size:85%'>Click an indicator for maps & charts.</spa</td><td style='text-align:left'><b>CHART?</b></td><td style='text-align:left'><b>VALUE</b></td><td style='text-align:left'><b>TIER</b></td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callVac()'>HOME VACANCY RATE</a><br><span style='font-size:85%'>one-time data for 2014</span></td><td></td><td>" + parseInt(100*props.perc_vac) + "%</td><td>" + props.vac + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callHo()'>HOMEOWNERSHIP RATE</a><br><span style='font-size:85%'>one-time data for 2014</span></td><td></td><td>" + parseInt(100*props.percent_oo) + "%</td><td>" + props.ho_rate + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callMSP(" + props.msp_2006 +","+ props.msp_2007 +"," + props.msp_2008+"," + props.msp_2009+"," + props.msp_2010+"," +props.msp_2011+"," +props.msp_2012+"," +props.msp_2013 + ")'>HOME SALE PRICE</a><br><span style='font-size:85%'>median, 2011-13</span></td><td>X</td><td>" + "$" + parseInt(props.msp_1113) + "</td><td>" + props.sale_pri + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callDOM(" + props.mdom_2006 +","+ props.mdom_2007 +"," + props.mdom_2008+"," + props.mdom_2009+"," + props.mdom_2010+"," +props.mdom_2011+"," +props.mdom_2012+"," +props.mdom_2013 + "," +props.mdom_2014 + ")'>DAYS ON MARKET</a><br><span style='font-size:85%'>median, 2011-13</span></td><td>X</td><td>" + parseInt(props.mdom_1113) + "</td><td>" + "N/A" + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callIP(" + props.ip_2006/props.sales_2006 +","+ props.ip_2007/props.sales_2007 +"," + props.ip_2008/props.sales_2008+"," + props.ip_2009/props.sales_2009 +"," + props.ip_2010/props.sales_2010+"," +props.ip_2011/props.sales_2011+"," +props.ip_2012/props.sales_2012+"," +props.ip_2013/props.sales_2013+ ")'>INVESTOR PURCHASES</a><br><span style='font-size:85%'>% of all home sales where the buyer was not an owner-occupant, 2000-2013</span></td><td>X</td><td>" + parseInt(100*props.perc_invst) + "%</td><td>" + props.inv_pur + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callForc(" + props.frc_2004 +"," + props.frc_2005 +"," + props.frc_2006 +","+ props.frc_2007 +"," + props.frc_2008+"," + props.frc_2009+"," + props.frc_2010+"," +props.frc_2011+"," +props.frc_2012+"," + props.frc_2013 + "," + props.frc_2014 +")'>FORECLOSURE RATE</a><br><span style='font-size:85%'>composite for 2006-14</span></td><td>X</td><td>" + parseInt(100*props.perc_forc) + "%</td><td>" + props.forc + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callTaxDel()'>TAX DELINQUENCY</a><br><span style='font-size:85%'>total class 2 tax delinquencies from 2006-2014, as a % of all class 2 properties in the neighborhood</span></td><td>X</td><td> " + parseInt(100*props.perc_tax_l) + "%</td><td>" + props.tax_del + "</td></tr>" +
-					"<tr><td style='text-align:left'><a href='javascript:callTaxLien()'>TAX LIEN PURCHASES</a><br><span style='font-size:85%'>% of all tax liens that were bought by investors, 2006-2014 (this shows that investors are still interested)</span></td><td>X</td><td>" + parseInt(100*(props.tls_0614/(props.tls_0614 + props.tlso_0614))) + "%</td><td>" + props.tax_lien_i + "</div>" +
-					"<tr><td style='text-align:left'><a href='javascript:callCrime()'>VIOLENT CRIME RATE</a><br><span style='font-size:85%'>incidents per 1000 residents, three-year average for 2011-13</span></td><td></td><td> " + parseInt(props.vc_rate/100) + "</td><td>" + props.vc_score + "</div>";
-						"</table>" +
-					"</div>";
-					document.getElementById("ngbhd_query_form").innerHTML = ngbhdSidebar_content;					
-				}
-
-var featureColor = 0;
-var selNgbhd = '';
-
-				function getColor(d) {
-					if (d==5) { return '#CCFFCC'; }
-					else if (d==4) {return '#99FFCC';}
-					else if (d==3) {return '#66FFCC';}
-					else if (d==2) {return '#00CC99';}
-					else if (d==1) {return '#009999';}
-					else return '#555555';
-				}					
-
-var legendPresent = 0;
-var legendContent = '';
-var legend = L.control({position: 'topright'});
-var div = L.DomUtil.create('div', 'info legend');
-				
-function drawNgbhds() {
-	
-	featureColor=0;
-	var spinner = new Spinner().spin(spinBox);
-	$('#spinBox').show();
-	
-	cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT *, ST_Centroid(the_geom) FROM ngbhd_master" + ngbhdSQL);
-	var labelText="";
-	
-			$.getJSON(cartoURL_ngbhdData,
-            function(data) {
-				
-				ngbhdLayer = L.geoJson(data, {
-				
-				style: style,
-				onEachFeature: function(feature, layer) {
-						if (selectedIndicator == 'VACANCY') {labelText = "Vacancy rate: " + parseInt(100*feature.properties.perc_vac) + "%<br>" + "Vacancy tier: " + feature.properties.vac;}
-						else if (selectedIndicator == 'HOMEOWNERSHIP') {labelText = "Homeownership: " + parseInt(100*feature.properties.per_ho) + "%<br>" + "Homeownership tier: " + feature.properties.ho_score;}
-						else if (selectedIndicator == 'SALE PRICE') {labelText = "Median sale price: $" + feature.properties.msp_1113 + "<br>" + "Sale price tier: " + feature.properties.sale_pri;}
-						else if (selectedIndicator == 'INVESTORS') {labelText = "Investor purchases: " + parseInt(100*feature.properties.perc_invst) + "%<br>" + "Investor tier: " + feature.properties.inv_pur;}
-						else if (selectedIndicator == 'FORECLOSURE') {labelText = "Foreclosure rate: " + parseInt(100*feature.properties.perc_forc) + "%<br>" + "Foreclosure tier: " + feature.properties.forc;}
-						else if (selectedIndicator == 'TAX DELINQUENCY') {labelText = "Tax delinquency: " + parseInt(100*feature.properties.perc_tax_l) + "%<br>" + "Tax delinquency tier: " + feature.properties.tax_del;}				
-						else if (selectedIndicator == 'TAX LIENS BOUGHT') {labelText = "Tax liens bought: " + parseInt(100*(feature.properties.tls_0614/(feature.properties.tls_0614 + feature.properties.tlso_0614))) + "%<br>" + "Liens bought tier: " + feature.properties.tax_lien_i;}						
-						else if (selectedIndicator == 'VIOLENT CRIME') {labelText = "Violent crimes per 1000 residents: " + parseInt(feature.properties.vc_rate/100) + "<br>" + "Violent crime tier: " + feature.properties.vc_score;}	
-						else if (selectedIndicator == 'COMPOSITE') {labelText = "Housing market: " + feature.properties.comp_class;}	
-						labelText = "<b>" + feature.properties.nsa.toUpperCase() + "</b><hr><span style='font-weight:normal'>" + labelText + "</span>";
-					layer.bindLabel(labelText)						
-					layer.on({click: clickNgbhd, mouseover: highlight, mouseout:dehighlight});
-						}						
-					}).addTo(map)
-
-			
-				$('#spinBox').hide();
-
-			function clickNgbhd(e) {
-				var layer = e.target;
-				selNgbhd = layer.feature.properties.nsa;
-				dashboardSidebar.update(layer.feature.properties);
-			}
-			
-			function highlight(e) {
-				var layer = e.target;
-				layer.bringToFront();
-				layer.setStyle({color: '#FF9900', weight:4});
-			}
-			
-			function dehighlight(e) {
-				var layer = e.target;
-				layer.setStyle({color: '#ffffff', weight:2});
-			}
-			
-			});
-
-			function style(feature) {
-			
-			if (selectedIndicator == 'VACANCY') {featureColor = feature.properties.vac;}
-			else if (selectedIndicator == 'HOMEOWNERSHIP') {featureColor = feature.properties.ho_rate;}
-			else if (selectedIndicator == 'SALE PRICE') { featureColor = feature.properties.sale_pri;}
-			else if (selectedIndicator == 'INVESTORS') { featureColor = feature.properties.inv_pur; }	
-			else if (selectedIndicator == 'FORECLOSURE') {featureColor = feature.properties.forc;}	
-			else if (selectedIndicator == 'TAX DELINQUENCY') {featureColor = feature.properties.tax_del;}				
-			else if (selectedIndicator == 'TAX LIENS BOUGHT') {featureColor = feature.properties.tax_lien_i;}				
-			else if (selectedIndicator == 'VIOLENT CRIME') {featureColor = feature.properties.vc_score;}	
-			else if (selectedIndicator == 'COMPOSITE') {
-					if (feature.properties.comp_class == 'Very Weak') { featureColor = 5;}
-					else if (feature.properties.comp_class == 'Weak') { featureColor = 4;}
-					else if (feature.properties.comp_class == 'Moderately Strong') { featureColor = 2;}
-					else if (feature.properties.comp_class == 'Strong') { featureColor = 1;}
-			}		
-			else { 	featureColor = 0; }
-			
-			return {
-					weight: 2,
-					opacity: .7,
-					color: 'white',
-					fillOpacity: 0.7,
-					fillColor: getColor(featureColor)
-				};
-			}
-			
-			legend.onAdd = function (map) {
-				legend.update();
-				return div;
-			}
-			
-			legend.update = function() {
-				getLegend();
-				div.innerHTML = legendContent;
-			}
-
-			if (legendPresent == 0) {
-				legend.addTo(map);
-				legendPresent = 1;
-			}
-			
-			else {
-				legend.update();
-			}
-			
-			
-}
-
-function getLegend() {
-				if (selectedIndicator == 'COMPOSITE') {
-				
-				categories = ['STRONG','MODERATE','WEAK', 'VERY WEAK'];
-				legendContent = '<b>OVERALL CONDITIONS</b><br>';
-				for (var i = 0; i < categories.length; i++) {
-					legendContent +=
-					'<i style="background:' + getColor(i+1) + '"></i> ' +
-					(categories[i] ? categories[i] + '<br>' : '+');
-				}
-				}
-				
-				else {
-				
-				categories = ['1: VERY STRONG', '2: STRONG','3: MODERATE','4: WEAK', '5: VERY WEAK'];
-				legendContent = '<b>' + selectedIndicator + '</b><br>';
-				for (var i = 0; i < categories.length; i++) {
-					legendContent +=
-					'<i style="background:' + getColor(i+1) + '"></i> ' +
-					(categories[i] ? categories[i] + '<br>' : '+');
-				}
-				}
-}
-
-function makeChart() {
-	chart = new Highcharts.Chart({
-        chart: { renderTo: 'chartbox', type: chartType},
-        title: { text:null},
-		xAxis: { labels: { step: 2 }, categories: chartYears },
-		yAxis: { min: 0, title: { text: null }},
-		series: chartSeries,
-		plotOptions: {column:{color:'#FF9933'}}
-	});
-
-}
-
-function exportPDF() {
-	return xepOnline.Formatter.Format('ngbhd_query_form');
-}
-  
-  
-</script>
-</body>
-</html>
