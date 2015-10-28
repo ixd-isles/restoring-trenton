@@ -341,10 +341,12 @@ var relsize;
 
 var popup = L.popup();
 
-var map = L.map('map', fullscreenControl: true,
+var map = L.map('map', {
+  fullscreenControl: true,
   fullscreenControlOptions: {
     position: 'topleft'
-  }).setView([40.224, -74.76], 15);
+  }
+}).setView([40.224, -74.76], 15);
 
 var stamen = L.tileLayer('http://a.tile.stamen.com/toner-lite/{z}/{x}/{y}.png', {attribution: config.additional_attrib + ' uses a <a href="http://stamen.com">stamen</a> basemap'});
 stamen.addTo(map);
