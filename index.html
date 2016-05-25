@@ -371,6 +371,9 @@ var redev_areasURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/c0afc7fc-5
 <!-- colors and label on neighborhood layer are styled in cartodb -->
 var ngbhd_masterURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/cb60f754-72a1-11e5-88a3-0e3ff518bd15/viz.json'; 
 
+<!-- colors and label on TDA layer are styled in cartodb -->
+var tda_URL = 'https://trenton-downtown.cartodb.com/api/v2/viz/f58865ee-2219-11e6-8a69-0e3a376473ab/viz.json'; 
+
 var infoLayer = new L.geoJson();
 var formURL = '';
 
@@ -424,7 +427,7 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 <!-- array to hold the different overlay layers we're creating from different queries of the property database -->
   overlayLayers = {}; 
 		<!-- don't forget to add any new layers to the menu! -->
-  var sublayers = [allPropsGet, vacantPropsGet, lienPropsGet, cityOwnedVacGet, redevAreaGet];
+  var sublayers = [allPropsGet, vacantPropsGet, lienPropsGet, cityOwnedVacGet, tdaGet, redevAreaGet];
 
 
 
@@ -471,6 +474,9 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 
  var redevAreaGet = {
 	 sql: "SELECT * FROM redev_areas"}
+
+ var tdaGet = {
+	 sql: "SELECT * FROM tda_boundary_1"}
 	 
  var ngbhd_basicGet = {
 	 sql: "SELECT * FROM ngbhd_master"
@@ -579,6 +585,21 @@ cartodb.createLayer(map, ngbhd_masterURL)
       sublayers.push(sublayer);
 	  layer.setInteraction(false);
       overlayLayers["NEIGHBORHOOD BOUNDARIES"] = layer;
+	 
+     }).on('error', function() { 
+      //log the error
+    });
+    
+<!-- TDA's boundary -->
+cartodb.createLayer(map, tda_URL)
+    .on('done', function(layer) { 
+      layer.setZIndex(13);
+      var sublayer = layer.getSubLayer(0);
+
+      sublayer.set(tdaGet);
+      sublayers.push(sublayer);
+	  layer.setInteraction(false);
+      overlayLayers["TRENTON DOWNTOWN"] = layer;
 	 
      }).on('error', function() { 
       //log the error
