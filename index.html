@@ -335,8 +335,9 @@ var ngbhdLayer = new L.geoJson();
 var crimeButtonOn = 0;
 var ngbhdButtonOn = 0;
 var crimeCounter = 0;
-
-
+var legendPresent = 0;
+var legend = L.control({position: 'topright'});
+var div = L.DomUtil.create('div', 'info legend');
 var relsize;
 
 var popup = L.popup();
@@ -673,7 +674,7 @@ var listOn = 0;
 			}
 	}
 
-
+;
  <!-- property query sidebar -->
  
   var div_sidebar = document.createElement('div');
@@ -1129,6 +1130,11 @@ function loadCrimeInterface() {
 		ngbhdButtonOn = 0;
 	};
 	
+	if (legendPresent !=0){
+		legend.removeFrom(map);
+		legendPresent = 0;
+	};
+	
 	map.setZoom(13);
 	drawCrime();
 
@@ -1377,10 +1383,9 @@ var selNgbhd = '';
 					else return '#555555';
 				}					
 
-var legendPresent = 0;
+
 var legendContent = '';
-var legend = L.control({position: 'topright'});
-var div = L.DomUtil.create('div', 'info legend');
+
 				
 function drawNgbhds() {
 	
