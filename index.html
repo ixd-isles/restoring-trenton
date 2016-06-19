@@ -351,9 +351,6 @@ var map = L.map('map', {
   }
 }).setView([40.224, -74.76], 15);
 
-//adds a "find me!" geolocator
-L.control.locate({icon: 'fa fa-map-marker fa-lg'}).addTo(map);
-
 var stamen = L.tileLayer('http://a.tile.stamen.com/toner-lite/{z}/{x}/{y}.png', {attribution: config.additional_attrib + ' uses a <a href="http://stamen.com">stamen</a> basemap'});
 stamen.addTo(map);
 
