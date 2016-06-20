@@ -35,7 +35,7 @@
 	<script src="button/leaflet-button.js"></script>
 
 <button id="searchbutton" role="button" class="btn-primary" title="ADVANCED SEARCH"><img src="button/eye_444444_18.png"></button>
-<button id="quicksearchbutton" role="button" class="btn-primary" title = "QUICK SEARCH"><img src="button/search_444444_18.png"></button>
+//<button id="quicksearchbutton" role="button" class="btn-primary" title = "QUICK SEARCH"><img src="button/search_444444_18.png"></button>
 <button id="deselectbutton" role="button" class="btn-primary" title = "CLEAR SELECTION"><img src="button/reply_ff9900_18.png"></button>
 <button id="data_list" role = "button" class="btn-switcher" style="z-index:10"><i class="fa fa-dashboard fa-2x" style="float:left; padding-right:3px; padding-left:2px;"></i><p style="float:left; color:#888888; margin-top:5px;margin-bottom:3px;padding-left:3px;padding-right:3px;font-family:'Open Sans'">DASHBOARDS</P>
 	<form id="modeList" style="display:none; padding-right:3px;"><br><BR>
@@ -711,27 +711,7 @@ var listOn = 0;
   });
 	map.addControl(dashboardSidebar);
 	
- <!-- stupid Google search addresses (THIS DOES NOT QUERY THE ACTUAL dB)
-	searchModule = new L.Control.GeoSearch({
-				provider: new L.GeoSearch.Provider.Google(), showMarker: false,
-			})
-	quicksearchButton = new L.Control.Button(L.DomUtil.get('quicksearchbutton'), { toggleButton: 'active' });
-	quicksearchButton.addTo(map);
-	quicksearchButton.on('click', function () {
-		if (quickSearchOn != 0) {
-			searchModule.removeFrom(map);
-			quickSearchOn = 0;
-			console.log('quick search is now off');
-		}
-		else {
-			searchModule.addTo(map); 
-			quickSearchOn = 1;
-				console.log('quick search is now on');
-		}
-
-	});
--->
-<!-- now replaced with leaflet-control-geocoder plugin -->
+ <!-- geocoder now replaced with leaflet-control-geocoder plugin; does NOT query actual dB -->
 
 var geocoder = new L.Control.Geocoder.google(),
 			control = L.Control.geocoder({
