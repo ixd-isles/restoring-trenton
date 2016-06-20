@@ -27,9 +27,8 @@
 <script src="leaflet-fullscreen/Control.FullScreen.js"></script>
 <link rel="stylesheet" href="leaflet-fullscreen/Control.FullScreen.css"></script>
 
-<link rel="stylesheet" href="GeoSearch/css/l.geosearch.css" />
-    <script src="GeoSearch/js/l.control.geosearch.js"></script>
-    <script src="GeoSearch/js/l.geosearch.provider.google.js"></script>
+<link rel="stylesheet" href="leaflet-control-geocoder-1.4.0/dist/Control.Geocoder.css" />
+<script src="leaflet-control-geocoder-1.4.0/dist/Control.Geocoder.js"></script>
 
 <link rel="stylesheet" href="leaflet-sidebar/L.Control.Sidebar.css" />
     <script src="leaflet-sidebar/L.Control.Sidebar.js"></script>
@@ -712,7 +711,7 @@ var listOn = 0;
   });
 	map.addControl(dashboardSidebar);
 	
- <!-- stupid Google search addresses (THIS DOES NOT QUERY THE ACTUAL dB) -->
+ <!-- stupid Google search addresses (THIS DOES NOT QUERY THE ACTUAL dB)
 	searchModule = new L.Control.GeoSearch({
 				provider: new L.GeoSearch.Provider.Google(), showMarker: false,
 			})
@@ -730,11 +729,18 @@ var listOn = 0;
 				console.log('quick search is now on');
 		}
 
-	});	
-  
+	});
+-->
+<!-- now replaced with leaflet-control-geocoder plugin -->
+
+var geocoder = new L.Control.Geocoder.google(),
+			control = L.Control.geocoder({
+				geocoder: geocoder,  
+          
+			}).addTo(map);       
 
  
-//searchie searchie!
+//searchie searchie! -- this is the actual dB query search
   
 
 		var parcelPolygon = new L.geoJson();
