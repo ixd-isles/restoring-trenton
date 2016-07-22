@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>RESTORING TRENTON - INTERACTIVE MAP</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />    
 
 <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
 <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
@@ -10,6 +10,12 @@
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
+<script  src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js">       </script>
+<link rel="stylesheet"  href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css"/>
+
+<script src="L.GeoSearch/js/l.control.geosearch.js"></script>
+<script src="L.GeoSearch/js/l.geosearch.provider.google.js"></script>
+<link rel="stylesheet" href="L.GeoSearch/css/l.geosearch.css">
 
 <script src="jquery/jquery-1.6.4.min.js"></script>
 <script src="spin-js/spin.js"></script>
@@ -21,6 +27,11 @@
 <script src="highcharts/highcharts.js"></script>
 <script src="leaflet-label/leaflet.label-src.js"></script>
 <link rel="stylesheet" href="leaflet-label/leaflet.label.css" />
+<link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
+<script src="accounting-js/accounting.min.js"></script>
+<script src="turf/turf.min.js"> </script>
+
+
 
 <script src="css2pdf/xepOnline.jqPlugin.js"></script>
 
@@ -32,19 +43,54 @@
 
 <link rel="stylesheet" href="leaflet-sidebar/L.Control.Sidebar.css" />
     <script src="leaflet-sidebar/L.Control.Sidebar.js"></script>
-	<script src="button/leaflet-button.js"></script>
+	<script src="button/leaflet-button.js"></script> 
 
-<button id="searchbutton" role="button" class="btn-primary" title="ADVANCED SEARCH"><img src="button/eye_444444_18.png"></button>
+<button id="fullscreenbutton" role="button" class='btn-primary' style="width:34px; height:34px;" title="FULL SCREEN" onclick = "window.open('http://ixd-isles.github.io/restoring-trenton', 'fspage', 'fullscreen=yes')"><i class="fa fa-arrows-alt fa-2x"></i></button>
 
-<button id="deselectbutton" role="button" class="btn-primary" title = "CLEAR SELECTION"><img src="button/reply_ff9900_18.png"></button>
-<button id="data_list" role = "button" class="btn-switcher" style="z-index:10"><i class="fa fa-dashboard fa-2x" style="float:left; padding-right:3px; padding-left:2px;"></i><p style="float:left; color:#888888; margin-top:5px;margin-bottom:3px;padding-left:3px;padding-right:3px;font-family:'Open Sans'">DASHBOARDS</P>
+<button id="searchbutton" role="button" class="btn-primary" style="width:34px; height:34px;" title="ADVANCED PROPERTY SEARCH"><i class="fa fa-search-plus fa-2x"></i></button>
+
+<div id="addsearchcontainer" style="display:none"><button id="addsearchbutton" role="button" class="btn-primary" style="width:34px; height:34px;float:left;" title="QUICK ADDRESS SEARCH"><i class="fa fa-search fa-2x"></i>
+ </button>
+
+<form id="addSearchFormlet" style="background-color:#ffffff; padding:8px;border:solid 1px #aaaaaa;border-radius:3px;" onsubmit="quickAddSearch(); return false;"><input id ="addSearchBox" style="font-size:110%;" placeholder="Enter address..."  autofocus="autofocus"></input><br>Use the format '10 E State St'</form> </div>
+ 
+<button id="deselectbutton" role="button" class="btn-primary" style="width:34px; height:34px;color:orange" title = "CLEAR SELECTION"><i class="fa fa-reply fa-2x" ></i></button>
+<button id="drawbutton" role="button" class="btn-primary" title = "DRAW NEIGHBORHOOD"><i class="fa fa-pencil fa-2x" style="float:left"></i></button>
+<button id="deletebutton" role="button" class="btn-primary" title = "DELETE NEIGHBORHOOD"><i class="fa fa-trash fa-2x" style="float:left"></i></button>
+
+<div id="ngbhdsearchcontainer" style="display:none"><button id="neighborhoodbutton" role="button" class="btn-primary" style="width:34px; height:34px;" title = "NEIGHBORHOOD-LEVEL STATS"><i class="fa fa-search"></i><i class="fa fa-home"></i><br><i class="fa fa-home"></i><i class="fa fa-home"></i>
+</button>
+
+<form id="ngbhdSearchFormlet" style="background-color:#ffffff; padding:8px;border:solid 1px #aaaaaa;border-radius:3px;">
+<b>GET STATS & PROPERTIES FOR A ...</b><BR>
+<input type="radio" name="ngbhdtype" id="hood_mode" onchange="cityArea()" >CITY NEIGHBORHOOD</input><br> 
+    <select id="hood_scroll" style="display:none; font-size:110%;margin-left:25px;">
+    </select>
+<input type="radio" name="ngbhdtype" id="plan_mode" onchange="planningArea()" >PLANNING AREA</input><br>
+    <select id="plan_scroll" style="display:none">
+    </select>
+<input type="radio" name="ngbhdtype" id="plan_mode" onchange="redevArea()" >REDEVELOPMENT AREA</input><br>
+    <select id="redev_scroll" style="display:none; font-size:110%;margin-left:25px;">
+    </select>
+<input type="radio" name="ngbhdtype" id="ward_mode" onchange="wardArea()" >WARD</input><br>
+    <select id="ward_scroll" style="display:none">
+    </select>
+<input type="radio" name="ngbhdtype" id="selfie_mode" onchange="customArea()" >CUSTOM NEIGHBORHOOD (DRAW)</input><br>
+
+</form>
+</div>
+
+<button id="data_list" role = "button" class="btn-switcher" style="z-index:10"><i class="fa fa-dashboard fa-2x" style="float:left; padding-right:3px; padding-left:2px;"></i><p style="float:left; color:#888888; margin-top:5px;margin-bottom:3px;padding-left:3px;padding-right:3px;font-family:'Open Sans';font-size:12px">DASHBOARDS</P>
 	<form id="modeList" style="display:none; padding-right:3px;"><br><BR>
 	<HR>
 	<input type="radio" name="mode" id="crime_mode" value="crime_mode" onchange="displaySelectedMode()">CRIME</input><BR>
 	<input type="radio" name="mode" id="ngbhd_mode" value="ngbhd_mode" onchange="displaySelectedMode()">NEIGHBORHOODS</input><BR>
 	<hr>
+	<input type="radio" name="mode" id="sid_mode" value="sid_mode" onchange="displaySelectedMode()">SID CALCULATOR</input>
+  <hr>
 	<input type="radio" name="mode" id="property_mode" value="property_mode" onchange="displaySelectedMode()" checked>PROPERTIES</input>
-	</form></button>
+	</form></button>  
+  
 <button id="crimeFilters" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'">VIOLENT CRIME</button>
 <button id="ngbhdFilters" role = "button" class="btn-switcher" style="color:#888888; margin-top:5px;margin-bottom:3px;padding-left:8px;padding-right:8px;font-family:'Open Sans'">NEIGHBORHOODS</button>
 
@@ -53,10 +99,29 @@
 
 <style>
 
-.leaflet-control-layers-toggle{ 
-    width:34px;
-	height:34px;
+
+.leaflet-control-layers{  
+  width:30px;
+  height:30px;    
 } 
+
+.leaflet-control-layers-toggle{ 
+  background-position:2px 2px;   
+}
+
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+  width:auto;
+  height:auto;
+	}
+
+.leaflet-container a:after {
+  margin-left: 0;
+  line-height: 3em;
+}
+
 
 .circle {
     background-image: url('button/fa-circle_32_0_444444_none.png');
@@ -91,6 +156,7 @@
 
 #sidebar{
 	font-family:"Courier New";
+//  font-size:100%;
 	padding:10px;
 }
 
@@ -106,8 +172,8 @@
 .btn-switcher{
 	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.25);
 	background-color:#ffffff;
-	font-family:"Courier New";
-	font-size:12px;
+//  font-family:"Courier New";
+	font-size:90%;
 	color:#777777;
 	border-radius: 4px;
 	margin: 0 0 0 10px;
@@ -138,10 +204,9 @@
 	font-size:12px;
 	color:#777777;
 	border-radius: 4px;
-	margin: 0 0 0 10px;
+	margin: 0 0 0 00px;
 	padding: 3px;
-	height: 34px;
-	width: 34px;
+	height: auto;
 }
 
 table, td {
@@ -159,7 +224,17 @@ td {
 a:link { color:#006666; text-decoration:none;}
 a:hover { color: #ff9900; }
 
-#spinBox {
+td#sidTable {
+  border:none;
+  padding: 0 3px 0 3px;
+  text-align:left;
+}
+
+td#sSum {
+  padding: 3px 8px 3px 8px;
+}
+
+#spinBox {  
     z-index:999;
     opacity:0.5;
     display:none;
@@ -177,6 +252,11 @@ a:hover { color: #ff9900; }
 #queryTable {
 	font-family:"Courier New";
 	font-size:12px;
+}
+
+#sidTable {
+  text-align:right;
+  font-size:90%;
 }
 
 #tierBand {
@@ -204,7 +284,7 @@ a:hover { color: #ff9900; }
 <div id = "queryTable" style="margin: 20px auto; width: 100%; display:none"></div>
 
 <div id="map" style="width: 100%; height: 100%;"></div>
-<div id="spinBox" claVss='spinner'></div>
+<div id="spinBox" class='spinner'></div>
 
 <script type="text/javascript">
 
@@ -215,7 +295,7 @@ var config =
     northeast: L.latLng(40.26000, -74.67000),
     rev_geocoding_apikey: 'AIzaSyAKf5AB_5QngOuThxqDCo8A8U17qpCBu00',
     database_name: 'trenton_master',
-    additional_attrib : 'created by iana dikidjieva for <a href="http://www.restoringtrenton.org">restoring trenton</a>. <b>go <a target-"blank" href="ixd-isles.github.io/restoring-trenton">full screen</a></b>!',
+    additional_attrib : 'created by iana dikidjieva for <a href="http://www.restoringtrenton.org">restoring trenton</a>. <br> Go <a target="blank" href="https://ixd-isles.github.io/restoring-trenton">full screen</a>!',
    	sql_url : 'http://restoringtrenton.cartodb.com/api/v2/sql?q=',
 	propertySearch_sidebar : "<fieldset><b>ADVANCED PROPERTY SEARCH</b><br>" +
 	"<span style='font-size:85%'><a style = 'text-decoration:none; color: #FF3300' href='http://www.restoringtrenton.org/#!using-the-interactive-map/c10s2'>Instructions on constructing your queries can be found here</a>.</span>" + 
@@ -237,7 +317,8 @@ var config =
   			"<option value='VACANT LOT'>VACANT LOT</option>" +
 		"</select> " + 
 		"<br><br>" +
-		"<div class='checkbox'><label><input type = 'checkbox' id='SR_class'><b>PROPERTY CLASS 2</B><br>1-4 family residential</option></label></div>" +
+		"<div class='checkbox'><label><input type = 'checkbox' id='SR_class'><b>PROPERTY CLASS 2</B><br>1-4 family residential</option></label></div><br>" +   
+    		"<div class='checkbox'><label><input type = 'checkbox' id='SR_liens'><b>TAX LIENS</B></option></label></div>" +
 		"<br>" +
 		"<b>CONDITIONS</b><br>"+
 		"<span style='font-size:85%'>Selecting more conditions will find properties with ANY of these conditions ('OR' search):</span>" +
@@ -311,7 +392,11 @@ var sidebar;
 var cartoURL = '';
 var query_string='';
 var queryHighlightOn = 0;
+var fullScreenButton = new L.Control.Button(L.DomUtil.get('fullscreenbutton'));
 var deselectButton = new L.Control.Button(L.DomUtil.get('deselectbutton'), { toggleButton: 'active' });
+var drawButton = new L.Control.Button(L.DomUtil.get('drawbutton'), {position:'topright', toggleButton:'active'}).on('click', function() {drawShape()});
+var deleteButton = new L.Control.Button(L.DomUtil.get('deletebutton'), {position:'topright', toggleButton:'active'}).on('click', function() {deleteShape()});
+var neighborhoodButton = new L.Control.Button(L.DomUtil.get('neighborhoodbutton'), {position:'topleft', toggleButton:'active'});
 var crimeSidebarButton = new L.Control.Button(L.DomUtil.get('crimeFilters'), {position:'topright', toggleButton: 'active' }).on('click', function () {
 			dashboardSidebar.toggle();
 		});
@@ -333,15 +418,33 @@ var legendPresent = 0;
 var legend = L.control({position: 'topright'});
 var div = L.DomUtil.create('div', 'info legend');
 var relsize;
+var shapeDrawOn = 0;
+var drawControl = new L.Control.Draw();
+var drawButtonsOn=0;
+
+var drawnItems = new L.FeatureGroup();
+var sidSetPopup = L.popup()
+
+accounting.settings.currency = {
+  symbol: "$",
+  decimal: ".",
+  thousand: ",",
+  precision: 0,
+  format: "%s%v"  
+ }
 
 var popup = L.popup();
 
+var ngbhdModeList = L.popup();
+
+
 var map = L.map('map', {
-  fullscreenControl: true,
-  fullscreenControlOptions: {
-    position: 'topleft'
-  }
+//  fullscreenControl: true,
+//  fullscreenControlOptions: {
+//    position: 'topleft'
+//  }
 }).setView([40.224, -74.76], 15);
+fullScreenButton.addTo(map);
 
 var stamen = L.tileLayer('http://a.tile.stamen.com/toner-lite/{z}/{x}/{y}.png', {attribution: config.additional_attrib + ' uses a <a href="http://stamen.com">stamen</a> basemap'});
 stamen.addTo(map);
@@ -352,7 +455,7 @@ googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 	attribution: config.additional_attrib + ' uses google satellite'
 });
 
- 
+
 var bases = { "streets (stamen toner lite)": stamen, "google satellite": googleSat};
 
 <!-- BE SURE THIS IS THE LATEST UPDATE OF THE MASTER PARCEL FILE, AND THAT IT IS ACTUALLY CALLED 'trenton_master' OR EVERYTHING WILL BREAK!!! -->
@@ -427,8 +530,10 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 
 
 <!-- basic parcel outlines - for some reason the layer selector breaks if this isn't loaded early. one day i'll learn why. -->
-  
-  cartodb.createLayer(map, parcelMasterURL)
+
+var baseParcelLayer;
+
+cartodb.createLayer(map, parcelMasterURL)
     .addTo(map)
     .on('done', function(layer) { 
       layer.setZIndex(1);
@@ -436,8 +541,10 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
       sublayer.set(allPropsGet);
       sublayers.push(sublayer);
       overlayLayers["BASE PARCELS"] = layer;
-
-      layer.setInteraction(true);
+                    
+      layer.setInteraction(true);  
+      baseParcelLayer = sublayer;
+      console.log(baseParcelLayer);
 	  
 
      }).on('error', function() { 
@@ -487,6 +594,9 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 	 sql: "SELECT * FROM auctionURL",
 	 cartocss: "#auctions{polygon-fill:...; ...}"
  }
+  
+
+
  
  
 -->
@@ -612,7 +722,7 @@ cartodb.createLayer(map, redev_areasURL)
       overlayLayers["REDEVELOPMENT AREAS"] = layer;
 	  
 	  <!-- YOU HAVE TO PUT THE LAYER SELECTOR IN THE LAST LAYER. DON'T $@^! ASK. -->
-	  L.control.layers(bases, overlayLayers, {position:'topleft'}).addTo(map);
+	  L.control.layers(bases, overlayLayers, {position:'topleft', }).addTo(map);
 
 
 
@@ -620,7 +730,7 @@ cartodb.createLayer(map, redev_areasURL)
       //log the error
     });
 
-<!-- data mode switcher -->	
+<!-- DATA MODE SWITCHER -->	
 
 var listOn = 0;
 	
@@ -639,33 +749,48 @@ var listOn = 0;
 		}
 	});
 
+var whichMode='';
 	function displaySelectedMode(){
-		var whichMode = $( "input:radio[name=mode]:checked" ).val();
+		whichMode = $( "input:radio[name=mode]:checked" ).val();
 		console.log(whichMode);
 
-			if (whichMode == "crime_mode") {
+			if (whichMode == "crime_mode") { 
+          clearDrawnItems();
 					loadCrimeInterface();
 				}
 			
-			else if (whichMode =="ngbhd_mode") {
+			else if (whichMode =="ngbhd_mode") { 
+          clearDrawnItems();
 					loadNgbhdInterface();
-			}
+			}  
+      
+      else if (whichMode =="sid_mode") { 
+          clearDrawnItems();
+          map.removeLayer(parcelPolygon);
+					sidMode();
+			} 
+      
 			else if (whichMode =="property_mode") {
 				map.removeLayer(crimeCluster);
-				map.removeLayer(crimeHeat);
+				map.removeLayer(crimeHeat);    
+        baseParcelLayer.setInteraction(true);
+        clearDrawnItems();  
+        clearDraw();
 	
 				if (crimeButtonOn != 0){
 					crimeSidebarButton.removeFrom(map);
-					crimeButtonOn = 0;
+					crimeButtonOn = 0; 
+          dashboardSidebar.hide();
 					};
 					
 				map.removeLayer(ngbhdLayer);
 				if (ngbhdButtonOn !=0){
 					ngbhdSidebarButton.removeFrom(map);
-					ngbhdButtonOn = 0;
+					ngbhdButtonOn = 0; 
+          dashboardSidebar.hide();
 				};
 				
-			        if (legendPresent !=0){
+			  if (legendPresent !=0){
 					legend.removeFrom(map);
 					legendPresent = 0;
 				};
@@ -673,7 +798,46 @@ var listOn = 0;
 	}
 
 ;
- <!-- property query sidebar -->
+
+<!-- END DATA MODE SWITCHER -->
+
+<!-- SEARCHES! -->
+
+<!-- QUICK ADDRESS SEARCH -->
+var quickSearchOn = 0;
+  addSearchButton = new L.Control.Button(L.DomUtil.get('addsearchbutton'), { toggleButton: 'active' }).addTo(map);
+  addSearchContainer = new L.Control.Button(L.DomUtil.get('addsearchcontainer'), {position:'topleft'}).addTo(map);
+  addSearchButton.on('click', function() {    
+    if (quickSearchOn == 0) { 
+//      addSearchInput = new L.Control.Button(L.DomUtil.get('addSearchFormlet'), { toggleButton: 'active' }).addTo(map);
+      addSearchBox.value=''; 
+      addsearchcontainer.style.display = 'block'; 
+      $("#addSearchBox").focus();
+      quickSearchOn = 1
+    }                                          
+    
+    else {
+      addsearchcontainer.style.display = 'none';
+      map.removeLayer(parcelPolygon);
+      quickSearchOn = 0;
+    } 
+  
+  });
+
+var parcelPolygon = new L.geoJson();
+
+function quickAddSearch() {
+  addquery = document.getElementById("addSearchBox").value; 
+ 
+  cartoURL = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master WHERE address ilike '%" + addquery + "%'");
+  
+ highlightPolygons();
+
+
+}
+<!-- END OF QUICK SEARCH FUNCTIONS -->
+
+<!-- ADVANCED PROPERTY SEARCH SIDEBAR -->
  
   var div_sidebar = document.createElement('div');
   div_sidebar.id = "sidebar";
@@ -686,39 +850,15 @@ var listOn = 0;
 	map.addControl(sidebar);
 	sidebar.setContent(config.propertySearch_sidebar);
   
-  	searchButton = new L.Control.Button(L.DomUtil.get('searchbutton'), { toggleButton: 'active' });
+  searchButton = new L.Control.Button(L.DomUtil.get('searchbutton'), { toggleButton: 'active' });
 	searchButton.addTo(map);
 	searchButton.on('click', function () {
 		sidebar.toggle()
 	});
 
- <!-- dashboard sidebar -->
  
-  var dashboard_sidebar = document.createElement('div');
-  dashboard_sidebar.id = "dashboardSidebar";
-  dashboard_sidebar.class = "sidebar";
-  $('body')[0].appendChild(dashboard_sidebar);
-  
-  dashboardSidebar = new L.control.sidebar('dashboardSidebar',{
-      position: 'right'
-  });
-	map.addControl(dashboardSidebar);
-	
- <!-- geocoder now replaced with leaflet-control-geocoder plugin; does NOT query actual dB -->
-
-var geocoder = new L.Control.Geocoder.google(),
-			control = L.Control.geocoder({
-				geocoder: geocoder,
-				position:'topleft'
-          
-			}).addTo(map);       
-
+<!-- ADVANCED SEARCH QUERY CONSTRUCTOR -->
  
-//searchie searchie! -- this is the actual dB query search
-  
-
-		var parcelPolygon = new L.geoJson();
-  
   	function runQuery(){
 
 		map.removeLayer(parcelPolygon);
@@ -802,6 +942,12 @@ var geocoder = new L.Control.Geocoder.google(),
 			whereClause = " WHERE ";
 			input_count = input_count+1;
 			selections[input_count] = "class = '2'";
+		} 
+    
+    if (document.getElementById("SR_liens").checked) {
+			whereClause = " WHERE ";
+			input_count = input_count+1;
+			selections[input_count] = "(city_liens > 0 or priv_liens > 0)";
 		}
 		
 		if ((document.getElementById("dumping").checked) || (document.getElementById("trash").checked) || (document.getElementById("xs").checked) || (document.getElementById("dilapidated").checked) || (document.getElementById("unsecured").checked) || (document.getElementById("animals").checked) || (document.getElementById("unmaintained").checked) || (document.getElementById("weeds").checked)) {
@@ -882,7 +1028,11 @@ var geocoder = new L.Control.Geocoder.google(),
 	
 		runQuery();
 		
+    highlightPolygons();
+    
+	}
 
+function highlightPolygons(){    	
 			$.getJSON(cartoURL, function(data) {
 			
 				parcelPolygon = L.geoJson(data, {
@@ -903,14 +1053,15 @@ var geocoder = new L.Control.Geocoder.google(),
 				$('#spinBox').hide();
 	 
 			});
-			queryHighlightOn=1;
-			deselectButton.addTo(map);
-			deselectButton.on('click', function () {
-				clearSelection();
-			});
-	}
-    	
-	
+			queryHighlightOn=1;  
+      
+      if (quickSearchOn!==1){
+        deselectButton.addTo(map);
+        deselectButton.on('click', function () {
+          clearSelection();
+        });
+      }
+}	
 	
 	function clearSelection()
 	{
@@ -972,6 +1123,233 @@ var geocoder = new L.Control.Geocoder.google(),
 		document.getElementById('map').style.display = 'block';
 	}
 
+
+<!-- NEIGHBORHOOD SEARCH -->
+var ngbhdListOn = 0;
+var ngbhdList = [];
+var wardList = ["North", "South", "East", "West"];
+var planHoodList = ["TDA", "Greater Trenton", "Old Trenton (NRTC)", "Trenton Hist. Devt. Collab. (NRTC)", "East Trenton Collab. (NRTC)"];
+var redevList = [];
+ngbhdQueryURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * from ngbhd_master';
+redevQueryURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * from redevelopment_areas_all';
+
+//constructing the selectors
+//made the neighborhood one not do sub-neighborhoods because ... w/e.
+$.getJSON(ngbhdQueryURL, function(data) {
+        i=0;
+				ngbhdPoly = L.geoJson(data, {  
+				  onEachFeature: function (feature, layer) { 
+            duplicate = 0;
+            if (feature.properties) {
+              for (j=0; j<i; j++) {
+                if (ngbhdList[j] == feature.properties.ngbhd) {
+                  duplicate = 1;
+                }                   
+           }
+            if (!duplicate) {
+              ngbhdList.push(feature.properties.ngbhd); 
+              i++;
+            }
+          } 
+          }
+        }) 
+    });
+    
+$.getJSON(redevQueryURL, function(data) {
+        i=0;
+				redevPoly = L.geoJson(data, {  
+				  onEachFeature: function (feature, layer) { 
+            if (feature.properties) {
+              redevList.push(feature.properties.area_name); 
+              i++;
+            }
+          } 
+        }) 
+      redevList.sort();
+    });
+
+
+
+//neighborhoodButton.addTo(map);
+
+  ngbhdSearchContainer = new L.Control.Button(L.DomUtil.get('ngbhdsearchcontainer'), {position:'topleft'}).addTo(map);
+  neighborhoodButton.on('click', function() {  
+    document.getElementById("property_mode").checked=true;
+    displaySelectedMode();
+      
+    if (ngbhdListOn == 0) { 
+      ngbhdsearchcontainer.style.display = 'block'; 
+      ngbhdListOn = 1
+    }                                          
+    
+    else {
+      ngbhdsearchcontainer.style.display = 'none';
+      ngbhdListOn = 0;
+    } 
+  
+  }); 
+ 
+var ngbhdListSelectorContent = ''; 
+var stats = [all=[all=0, city=0, liens=0], vacbldg=[all=0, city=0, liens=0, unsecured=0], vaclot=[all=0, city=0, liens=0, dumping=0]];
+function cityArea() {
+  map.removeLayer(parcelPolygon); 
+  ngbhdList.sort(); 
+  for (j=0; j<ngbhdList.length; j++) {
+    ngbhdListSelectorContent = ngbhdListSelectorContent + "<option id='" + ngbhdList[j] + "'>" + ngbhdList[j] + "</option>";
+    if (j < (ngbhdList.length - 1)) {
+      ngbhdListSelectorContent = ngbhdListSelectorContent + "+";
+    }
+  }                                                                                              
+  hood_scroll.innerHTML = ngbhdListSelectorContent; 
+  redev_scroll.style.display = "none";
+  hood_scroll.style.display = "block";
+  map.setZoom(13); 
+  
+  $.getJSON(ngbhdQueryURL, function(data) {
+      parcelPolygon = L.geoJson(data, {
+         style: { color: "#660066", fillColor:"#660066", weight: 3, opacity:0.5, fillOpacity:0.5 },
+         onEachFeature: function(feature, layer) {
+           layer.bindLabel(feature.properties.nsa);	
+           layer.on( {
+            mouseover: highlight,
+            mouseout: dehighlight,
+          //  click: getQuickStats
+           });
+         }       
+        
+        }).addTo(map);
+        
+      function highlight(e) {
+				var layer = e.target;
+				layer.setStyle({color: '#FF9900', fillColor: "#FF9900", weight:4});
+			}
+			
+			function dehighlight(e) {
+				var layer = e.target;
+				layer.setStyle({color: '#660066', fillColor: "#660066", weight:2});
+			}
+      
+    });
+  
+}  
+
+var redevListSelectorContent = ''; 
+function redevArea() {
+  map.removeLayer(parcelPolygon);
+  redevList.sort(); 
+  for (j=0; j<redevList.length; j++) {
+    redevListSelectorContent = redevListSelectorContent + "<option id='" + redevList[j] + "'>" + redevList[j] + "</option>";
+    if (j < (redevList.length - 1)) {
+      redevListSelectorContent = redevListSelectorContent + "+";
+    }
+  }                                                                                              
+  redev_scroll.innerHTML = redevListSelectorContent;
+  redev_scroll.style.display = "block";
+  hood_scroll.style.display = "none";
+  map.setZoom(13); 
+  
+  $.getJSON(redevQueryURL, function(data) {
+        parcelPolygon = L.geoJson(data, {
+         style: { color: "#660066", fillColor:"#660066", weight: 3, opacity:0.5, fillOpacity:0.5 },
+         onEachFeature: function(feature, layer) {
+           layer.bindLabel(feature.properties.area_name);	
+           layer.on( {
+            mouseover: highlight,
+            mouseout: dehighlight
+           });
+         }       
+        
+        }).addTo(map);
+        
+      function highlight(e) {
+				var layer = e.target;
+				layer.setStyle({color: '#FF9900', fillColor: "#FF9900", weight:4});
+			}
+			
+			function dehighlight(e) {
+				var layer = e.target;
+				layer.setStyle({color: '#660066', fillColor: "#660066", weight:2});
+			}
+    });
+  
+}
+
+	
+		
+<!-- END NEIGHBORHOOD SEARCH FUNCTIONS -->
+
+
+<!-- DASHBOARD SIDEBAR -->
+ 
+  var dashboard_sidebar = document.createElement('div');
+  dashboard_sidebar.id = "dashboardSidebar";
+  dashboard_sidebar.class = "sidebar";
+  $('body')[0].appendChild(dashboard_sidebar);
+  
+  dashboardSidebar = new L.control.sidebar('dashboardSidebar',{
+      position: 'right'
+  });
+	map.addControl(dashboardSidebar);
+<!-- END DASHBOARD SIDEBAR -->
+
+<!-- RESET ON MODE CHANGE -->
+
+function clearNeighborhoods(){
+  console.log("entering clearNeighborhoods");
+	if (!dashboardSidebar.isVisible()) {
+		dashboardSidebar.toggle();
+		}
+	if (ngbhdButtonOn!=0){
+		ngbhdSidebarButton.removeFrom(map);
+		ngbhdButtonOn = 0;
+	}; 
+
+	if ($.contains( document.ngbhdLayer, document.map )!=='false'){
+	  map.removeLayer(ngbhdLayer);
+	};  
+  
+  if (legendPresent !=0){
+		legend.removeFrom(map);
+		legendPresent = 0;
+	};
+	console.log("out of clearNeighborhoods");
+}
+
+function clearCrime() {
+
+	if (dashboardSidebar.isVisible()) {
+		dashboardSidebar.toggle();
+		}
+
+	if ($.contains( document.crimeHeat, document.map )!=='false'){
+	  map.removeLayer(crimeHeat);
+	}; 
+  
+  if ($.contains( document.crimeCluster, document.map )!=='false'){
+	  map.removeLayer(crimeCluster);
+	};
+
+  if (crimeButtonOn != 0){
+		crimeSidebarButton.removeFrom(map);
+		crimeButtonOn = 0;
+		};
+
+}
+
+function clearDraw() {
+   if (drawButtonsOn!=0) {
+      console.log("found draw buttons!");
+      drawButton.removeFrom(map);
+      deleteButton.removeFrom(map);  
+      drawButtonsOn=0;
+  }  
+  clearDrawnItems();
+}
+
+<!-- END RESET BASED ON MODE -->
+
+<!-- CRIME DASHBOARD -->
+
 function crimeQuery() {
 
 	crimeSQL = '';
@@ -1018,10 +1396,11 @@ function crimeQuery() {
 }	
 
 function drawCrime() {
-
+  clearNeighborhoods();
+  clearDraw();
 	map.removeLayer(crimeCluster);
 	map.removeLayer(crimeHeat);
-	map.removeLayer(ngbhdLayer);
+
 	crimeCoords = [];
 	crimeCounter = 0;
 
@@ -1178,11 +1557,19 @@ map.on('zoomend', function(e){
 		crimeHeat.redraw();
 	}
 	});	
+  
+<!-- END CRIME DASHBOARD -->
+
+
+
+<!-- NEIGHBORHOOD DASHBOARD -->
 
 var ngbhdSidebar_content ='';	
 var selectedIndicator = 'COMPOSITE';
 
 function loadNgbhdInterface() {
+  clearCrime();
+  clearDraw();
 	dashboardSidebar.setContent(config.ngbhdSidebar_content);
 	if (!dashboardSidebar.isVisible()) {
 		dashboardSidebar.toggle();
@@ -1192,14 +1579,6 @@ function loadNgbhdInterface() {
 		ngbhdButtonOn = 1;
 	};
 	map.removeLayer(ngbhdLayer);
-	
-	map.removeLayer(crimeCluster);
-	map.removeLayer(crimeHeat);
-	
-	if (crimeButtonOn != 0){
-		crimeSidebarButton.removeFrom(map);
-		crimeButtonOn = 0;
-		};
 	
 	map.setZoom(13);
 
@@ -1212,7 +1591,7 @@ function loadNgbhdInterface() {
 
 function refreshNgbhds() {
 	map.removeLayer(ngbhdLayer);
-	drawNgbhds();
+	drawNgbhds();   
 }
 
 //setting up the functions that call the chart
@@ -1379,7 +1758,7 @@ function drawNgbhds() {
 	var spinner = new Spinner().spin(spinBox);
 	$('#spinBox').show();
 	
-	cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT *, ST_Centroid(the_geom) FROM ngbhd_master" + ngbhdSQL);
+cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT *, ST_Centroid(the_geom) FROM ngbhd_master" + ngbhdSQL);
 	var labelText="";
 	
 			$.getJSON(cartoURL_ngbhdData,
@@ -1512,10 +1891,308 @@ function makeChart() {
 }
 
 function exportPDF() {
-	return xepOnline.Formatter.Format('ngbhd_query_form');
+	return xepOnline.Formatter.Format('ngbhd_query_form'); 
 }
+
+<!-- END NEIGHBORHOOD DASHBOARD -->
+    
+//defining a bunch of crap for user-drawn polygons, SID calculations, etc.
+
+    var drawnItemsJson; 
+
+    var poly = new L.Draw.Polygon(map, {
+      shapeOptions: {
+        color: 'purple'
+      }, allowIntersection: false,
+					drawError: {
+						color: 'orange',
+						timeout: 1000
+					},
+					showArea: true,
+					metric: false,
+					repeatMode: false
+    });
+
+    var drawnPoly;
+        var allPropStats={count:0,value:0, taxes:0};  
+        var class2Stats={count:0,value:0, taxes:0};
+        var taxableStats={count:0,value:0, taxes:0}; 
+        var taxedStats={count:0,value:0, taxes:0}; 
+        var defaultStats={count:0,value:0, taxes:0, liens:0}; 
+        
+        var rateSet = 4.5;
+        var city=0;
+        var county=0;
+        var state_cash=0;
+        var other_cash=0;
+        var totalRev=0; 
+        
+
+        var theoColl=0;
+        var expColl=0;
+
+function resetStats() {
+
+       allPropStats={count:0,value:0, taxes:0};  
+       class2Stats={count:0,value:0, taxes:0};
+       taxableStats={count:0,value:0, taxes:0}; 
+       taxedStats={count:0,value:0, taxes:0}; 
+       defaultStats={count:0,value:0, taxes:0, liens:0}; 
+        
+       rateSet = 4.5;
+       city=0;
+       county=0;
+       state_cash=0;
+       other_cash=0;
+       totalRev=0; 
+        
+
+       theoColl=0;
+       expColl=0;
+
+}
+
+function sidMode() {
+
+    clearNeighborhoods();
+    clearCrime();
+    resetStats();     
+    	if ($.contains( document.drawButton, document.map )!=='true'){
+          drawButton.addTo(map);
+          deleteButton.addTo(map); 
+          drawButtonsOn=1; 
+          console.log(drawButtonsOn); 
+      }
+    map.on('draw:created', function() {findIfInside()});
+    
+   
+		} 
+
+function clearDrawnItems() {
+  resetStats();    
+  if (map.hasLayer(drawnItems)  ) {       
+          map.removeLayer(drawnItems);
+          drawnItems = L.FeatureGroup(); 
+    }
+} 
+
+   function drawShape() {     
+   
+      clearDrawnItems();
+    
+     if (shapeDrawOn==1) {
+      poly.disable();  
+      document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil fa-2x'></i>"; 
+      shapeDrawOn = 0;
+      baseParcelLayer.setInteraction(true); 
+      resetStats();
+   
+    }
+    
+    else {
+      baseParcelLayer.setInteraction(false); 
+      document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil-square fa-2x'></i>";
+      drawnItems = new L.FeatureGroup();
+      resetStats();
+      poly.enable();
+      shapeDrawOn = 1;  
+    }
   
+ 
+    //make a sexy polygon 
+		map.on('draw:created', function (e) {                                                                                
+   
+    		var type = e.layerType,
+				layer = e.layer;
+
+
+			drawnItems.addLayer(layer);
+      drawnItems.addTo(map); 
+      
+      drawnItemsJson = drawnItems.toGeoJSON();  
+      console.log( drawnItemsJson.features[0]);  
+      
+      drawnPoly = L.geoJson(drawnItemsJson);   
+      poly.disable();    
+      baseParcelLayer.setInteraction(true); 
+      document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil fa-2x'></i>"; 
+          
+
+      });
+    } 
+    
+    function deleteShape() {
+      poly.disable(); 
+      if (map.hasLayer(drawnItems)  ) {       
+        map.removeLayer(drawnItems);
+        drawnItems = L.FeatureGroup(); 
+        resetStats();
+    
+      }
+
+    }  
+       
+      function findIfInside(){  
+      
+      var loadEmAll = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM trenton_master")
+      
+      var spinner = new Spinner().spin(spinBox);
+      $('#spinBox').show();
+   
+          $.getJSON(loadEmAll,
+            function(data) {      
+			
+	      infoLayer = L.geoJson(data, {
+
+          onEachFeature: function (feature, layer) {  
+         
+//          if (drawnPoly.getBounds().contains([feature.geometry.coordinates[1], feature.geometry.coordinates[0]])) {  
+          
+//            lat = feature.geometry.coordinates[1];
+//            lng = feature.geometry.coordinates[0]; 
+             
+//            var centroid = turf.centroid(feature);
+//            var inside = turf.inside(centroid, drawnItemsJson.features[0]);  
+            
+              if (turf.inside(turf.centroid(feature), drawnItemsJson.features[0])) { 
+              //pull the class 2 residential props out and treat them separately -- update if other classes need to be removed
+
+                allPropStats.count ++;
+                allPropStats.value += parseInt(feature.properties.totalassmt);  
+                allPropStats.taxes += feature.properties.taxes;
+
+              if (feature.properties.class=='2') {
+                console.log("class 2");
+                class2Stats.count ++;  
+                class2Stats.value += parseInt(feature.properties.totalassmt);  
+                class2Stats.taxes += feature.properties.taxes; 
+                
+                } 
+                
+              //everything else is in principle taxable...
+              else { 
+              
+                    taxableStats.count ++; 
+                    taxableStats.value += parseInt(feature.properties.totalassmt);  
+                    taxableStats.taxes += feature.properties.taxes;  
+                       
+                //but we only tax some of it
+                if (feature.properties.taxes > 0) {
+                    taxedStats.count ++;
+                    taxedStats.value += parseInt(feature.properties.totalassmt);
+                    taxedStats.taxes += feature.properties.taxes; 
+                    
+                     //and some people just aren't paying their damn taxes...
+                    if ((feature.properties.city_liens > 0) || (feature.properties.priv_liens > 0))     {
+                     defaultStats.count ++;
+                     defaultStats.value += parseInt(feature.properties.totalassmt);
+                     defaultStats.taxes += feature.properties.taxes;
+                     defaultStats.liens += feature.properties.city_liens + feature.properties.priv_liens;
+                    }
+                }             
+             
+              } 
+                                                                                        
+                
+              theoColl = accounting.formatMoney(rateSet*taxedStats.taxes/100) ;
+              expColl =  accounting.formatMoney(rateSet*(taxedStats.taxes-defaultStats.taxes)/100)  ;   
+              totalRev = accounting.formatMoney(expColl);
+              }
+              }           
+             
+           
+            
+        });
+        				$('#spinBox').hide();
+        
+                
+        sidPopup = 
+              "<b>SID CALCULATOR</b>"+
+              "<hr> " +   
+              "<table id='sidTable'>" + 
+              "<tr style='font-weight:bold;text-align:left'><td id='sSum' > </td><td id='sSum' >ALL</td><td id='sSum' >NON CLASS 2</td><td id='sSum' >NON CLASS 2: TAXED</td><td id='sSum' >DELINQUENT<br><span style='font-size:80%'>as % of taxed</span></td></tr>" +
+              "<tr ><td id='sSum' style='text-align:left'><b>NUMBER</B></td><td id='sSum' >" + allPropStats.count + "</td><td id='sSum' >" + taxableStats.count + "</td><td id='sSum' >" + taxedStats.count + "</td><td id='sSum' >" + defaultStats.count + "<br><span style='font-size:80%'>" + (100*defaultStats.count/taxedStats.count).toFixed(0) + "%</span></td></tr>" +
+              "<tr ><td id='sSum' style='text-align:left'><b>VALUE</B></td><td id='sSum' >" + accounting.formatMoney(allPropStats.value) + "</td><td id='sSum' >" + accounting.formatMoney(taxableStats.value) + "</td><td id='sSum' >" + accounting.formatMoney(taxedStats.value) + "</td><td id='sSum' >" + accounting.formatMoney(defaultStats.value) + "</td></tr>" +              
+              "<tr ><td id='sSum' style='text-align:left'><b>TAXES</B></td><td id='sSum' >" + accounting.formatMoney(allPropStats.taxes) + "</td><td id='sSum' >" + accounting.formatMoney(taxableStats.taxes) + "</td><td id='sSum' >" + accounting.formatMoney(taxedStats.taxes) + "</td></td id='sSum' >" + "</td><td id='sSum'>" + accounting.formatMoney(defaultStats.taxes) + "</td></tr>" + 
+              "<tr ><td id='sSum' style='text-align:left'><b>LIENS</B></td><td id='sSum' ></td><td id='sSum' ></td><td id='sSum' ></td><td id='sSum' >" + accounting.formatMoney(defaultStats.liens) + "</td></tr>" +     
+             "</table>" + 
+             "<hr>"+
+             "<b>SID RATE:</b>" + 
+             "&nbsp &nbsp<b><output for 'sidRateInput' id='sidDisplay'>4.5</output>%</b>" + 
+             "&nbsp &nbsp<input type='range' min='0' max='20' value='4.5' step='0.5' id='sidRateInput' oninput='outputUpdate(value, city, county, state_cash, other_cash)'>&nbsp &nbsp" +             
+             "<br><span style='font-size:80%'>(TDA is 4.5%)</span>" +   
+             "<hr>" +
+             "<b>BASE REVENUE</B>" + 
+             "<table style='border:none'>" +
+             "<tr><td id='sidTable'><input type='radio' name='whichToUse' id='whichToUse' value='theoretical' onchange='outputUpdate(rateSet, city, county, state_cash, other_cash)'></input> THEORETICAL &nbsp &nbsp</td><td id='sidTable'><output for 'sidRateInput' id='theoCollDisplay'>" + theoColl + "</output></td></tr>"+
+             "<tr><td id='sidTable'><input type='radio' name='whichToUse' id='whichToUse' value='expected' onchange='outputUpdate(rateSet, city, county, state_cash, other_cash)' checked></input> EXPECTED &nbsp &nbsp</td><td id='sidTable'><output for 'sidRateInput' id='expCollDisplay'>" + expColl + "</output></td></tr>"+
+             "</table>" + 
+             "<hr>" + 
+             "<b>OTHER REVENUE</B>" + 
+             "<table style='border:none'>" +
+             "<tr><td id='sidTable'>CITY &nbsp &nbsp </td><td id='sidTable'> $ <input type='text' id='cityCash' onchange='outputUpdate(rateSet, value, county, state_cash, other_cash)'></td></tr>" +    
+             "<tr><td id='sidTable'>COUNTY &nbsp &nbsp </td><td id='sidTable'> $ <input type='text' id='countyCash' onchange='outputUpdate(rateSet, city, value, state_cash, other_cash)'></td></tr>" + 
+             "<tr><td id='sidTable'>STATE &nbsp &nbsp </td><td id='sidTable'> $ <input type='text' id='stateCash' onchange='outputUpdate(rateSet, city, county, value, other_cash)'></td></tr>" +
+             "<tr><td id='sidTable'>OTHER &nbsp &nbsp </td><td id='sidTable'> $ <input type='text' id='otherCash' onchange='outputUpdate(rateSet, city, county, state_cash, value)'></td></tr>"  +
+             "</table>" +
+             "<hr>" + 
+             "<b>YOUR ANNUAL BUDGET: </B>" +             
+             "&nbsp &nbsp<b><output id='annualBudget'>" + totalRev + "</output></b>" +
+             "<hr>"
+
+             ;
+        
+        
+        var sidResult = L.popup({maxWidth:'auto'})
+          .setLatLng(drawnPoly.getBounds().getNorthWest())
+          .setContent(sidPopup) 
+          .openOn(map);
+
+          drawnItems.eachLayer(function(layer) {
+            layer.bindPopup(sidResult);  
+            
+            });
+           
+        
+        });    
+        }
+    
+    
+    
+         function outputUpdate(rate, city_cash, county_cash, st_cash, o_cash) {  
+          model = $( "input:radio[name=whichToUse]:checked" ).val();    
+          rateSet = rate;      
+          city=parseInt(city_cash);
+          county=parseInt(county_cash);
+          state_cash=parseInt(st_cash);
+          other_cash=parseInt(o_cash);
+          theoColl = accounting.formatMoney(rateSet*taxedStats.taxes/100);
+          expColl = accounting.formatMoney(rateSet*(taxedStats.taxes-defaultStats.taxes)/100) ; 
+          
+          if (model=='theoretical') {
+            totalRev = accounting.formatMoney((rateSet*taxedStats.taxes/100) + city + county + state_cash + other_cash); 
+          }                                              
+          
+          else {
+            totalRev = accounting.formatMoney((rateSet*(taxedStats.taxes-defaultStats.taxes)/100)+ city + county + state_cash + other_cash ); 
+          }
+          
+          document.querySelector('#sidDisplay').value = rateSet; 
+          document.querySelector('#theoCollDisplay').value = theoColl;
+          document.querySelector('#expCollDisplay').value = expColl;   
+          document.querySelector('#annualBudget').value = totalRev;  
+          
+          console.log(model, city, county, state_cash, other_cash);
+        
+        } 
+
+function ngbhdSearchMode() {
+  
+
+
+}
+    
   
 </script>
 </body>
-</html>
+</html>  
