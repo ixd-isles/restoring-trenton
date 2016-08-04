@@ -477,7 +477,7 @@ var formURL = '';
 
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
-cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM trenton_master WHERE parc_type ilike '%vacant%'");
+cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM trenton_master");
 
 		$.getJSON(cartoURL_infolayer,
             function(data) {
