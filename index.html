@@ -477,7 +477,7 @@ var formURL = '';
 
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
-cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM trenton_master");
+cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction  FROM trenton_master");
 
 		$.getJSON(cartoURL_infolayer,
             function(data) {
