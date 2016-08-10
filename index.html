@@ -377,7 +377,8 @@ var config =
 		
 		table_base : "<h3>SEARCH RESULTS</h3>" + 
 			"<button role='button' class='btn-primary' onclick='javascript:hideTable();'><img src='button/map_444444_16.png'></button> back to map "+
-			"<button role='button' class='btn-primary' onclick='javascript:downloadSelection();'><img src='button/download_444444_16.png'></button> save as .csv " +
+			"<button role='button' class='btn-primary' onclick='javascript:downloadCSV();'><img src='button/download_444444_16.png'></button> save as .csv " +
+			"<button role='button' class='btn-primary' onclick='javascript:downloadJSON();'><img src='button/download_444444_16.png'></button> save as .json " +
 			"<hr>"
 	  
 }	
@@ -1076,10 +1077,18 @@ function highlightPolygons(){
 		
      }
 
-	function downloadSelection()
+	function downloadCSV()
 	{
 		runQuery();
 		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=CSV&filename=restoring_trenton_query.csv&q=';
+		cartoURL = cartoURL + encodeURI(query_string);
+		window.open(cartoURL);
+     
+		}
+	function downloadJSON()
+	{
+		runQuery();
+		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=JSON&filename=restoring_trenton_query.json&q=';
 		cartoURL = cartoURL + encodeURI(query_string);
 		window.open(cartoURL);
      
