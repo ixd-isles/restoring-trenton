@@ -406,7 +406,7 @@ var ngbhdSidebarButton = new L.Control.Button(L.DomUtil.get('ngbhdFilters'), {po
 var modeSwitcher = new L.Control.Button(L.DomUtil.get('data_list'), {position:'topright'});
 var crimeData = new L.geoJson();
 var crimeSQL = "";
-var crimeCluster = new L.markerClusterGroup();
+var crimeCluster;
 var crimeCoords = [];
 var crimeHeat = L.heatLayer();
 var ngbhdSQL = "";
