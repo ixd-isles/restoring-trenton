@@ -10,8 +10,7 @@
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
-<script  src="https://leaflet.github.io/Leaflet.draw/examples/libs/leaflet-src.js">       </script>
-<link rel="stylesheet"  href="http://leaflet.github.io/Leaflet.draw/dist/leaflet.draw.css"/>
+
 
 <script src="L.GeoSearch/js/l.control.geosearch.js"></script>
 <script src="L.GeoSearch/js/l.geosearch.provider.google.js"></script>
@@ -97,17 +96,13 @@
 <body>
 
 <style>
-
-
 .leaflet-control-layers{  
   width:30px;
   height:30px;    
 } 
-
 .leaflet-control-layers-toggle{ 
   background-position:2px 2px;   
 }
-
 .leaflet-control-layers-expanded {
 	padding: 6px 10px 6px 6px;
 	color: #333;
@@ -115,13 +110,10 @@
   width:auto;
   height:auto;
 	}
-
 .leaflet-container a:after {
   margin-left: 0;
   line-height: 3em;
 }
-
-
 .circle {
     background-image: url('button/fa-circle_32_0_444444_none.png');
 	width:32px;
@@ -130,7 +122,6 @@
     text-align: center;
 	color: #fff;
 }
-
 		.info {
 			padding: 6px 8px;
 			font: 90% Open Sans;
@@ -139,7 +130,6 @@
 			box-shadow: 0 0 15px rgba(0,0,0,0.2);
 			border-radius: 5px;
 		}
-
 		.legend {
 			text-align: left;
 			line-height: 18px;
@@ -152,22 +142,18 @@
 			margin-right: 8px;
 			opacity: 0.9;
 		}
-
 #sidebar{
 	font-family:"Courier New";
 //  font-size:100%;
 	padding:10px;
 }
-
 #dashboardSidebar{
 	font-family:"Courier New";
 	padding:10px;
 }
-
 #option{
 	font-family:"Courier New";
 }
-
 .btn-switcher{
 	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.25);
 	background-color:#ffffff;
@@ -181,7 +167,6 @@
 	float:right;
 	text-align:left;
 }
-
 .dashboards {
 	border: 1px solid #aaaaaa;
 	box-shadow: 1px 1px 2px #999999;
@@ -195,7 +180,6 @@
 	padding: 8px;
 	height: auto;
 }
-
 .btn-primary{
 	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.25);
 	background-color:#ffffff;
@@ -207,32 +191,26 @@
 	padding: 3px;
 	height: auto;
 }
-
 table, td {
 	border-collapse: collapse;
 	border: solid 1px #cccccc;
 	font-family: "Open Sans";
 	font-size:12px;
 }
-
 td {
     padding: 8px;
 	text-align:'right';
 }
-
 a:link { color:#006666; text-decoration:none;}
 a:hover { color: #ff9900; }
-
 td#sidTable {
   border:none;
   padding: 0 3px 0 3px;
   text-align:left;
 }
-
 td#sSum {
   padding: 3px 8px 3px 8px;
 }
-
 #spinBox {  
     z-index:999;
     opacity:0.5;
@@ -247,17 +225,14 @@ td#sSum {
     top:50%;
     left:50%
 }
-
 #queryTable {
 	font-family:"Courier New";
 	font-size:12px;
 }
-
 #sidTable {
   text-align:right;
   font-size:90%;
 }
-
 #tierBand {
 	font-weight:bold;
 	font-size:120%;
@@ -266,7 +241,6 @@ td#sSum {
 	margin-bottom:8px;
 	padding-left:10px;
 }
-
 .leaflet-label-other {
   background-color: #fff;
   border: 1px solid #444;
@@ -276,7 +250,6 @@ td#sSum {
   opacity: 0.7;
   padding: 3px;
 }
-
 </style>
 
 
@@ -286,7 +259,6 @@ td#sSum {
 <div id="spinBox" class='spinner'></div>
 
 <script type="text/javascript">
-
 var config =
 {
 	city: "Trenton",
@@ -381,7 +353,6 @@ var config =
 			"<hr>"
 	  
 }	
-
 var sql = new cartodb.SQL({ user: 'restoringtrenton', format: 'geojson' });
 var polygon;
 var searchPolygons = [];
@@ -421,10 +392,8 @@ var relsize;
 var shapeDrawOn = 0;
 var drawControl;
 var drawButtonsOn=0;
-
 var drawnItems = new L.FeatureGroup();
 var sidSetPopup = L.popup()
-
 accounting.settings.currency = {
   symbol: "$",
   decimal: ".",
@@ -432,12 +401,8 @@ accounting.settings.currency = {
   precision: 0,
   format: "%s%v"  
  }
-
 var popup = L.popup();
-
 var ngbhdModeList = L.popup();
-
-
 var map = L.map('map', {
 //  fullscreenControl: true,
 //  fullscreenControlOptions: {
@@ -445,40 +410,28 @@ var map = L.map('map', {
 //  }
 }).setView([40.224, -74.76], 15);
 fullScreenButton.addTo(map);
-
 var stamen = L.tileLayer('http://a.tile.stamen.com/toner-lite/{z}/{x}/{y}.png', {attribution: config.additional_attrib + ' uses a <a href="http://stamen.com">stamen</a> basemap'});
 stamen.addTo(map);
-
 googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
     maxZoom: 20,
     subdomains:['mt0','mt1','mt2','mt3'],
 	attribution: config.additional_attrib + ' uses google satellite'
 });
-
-
 var bases = { "streets (stamen toner lite)": stamen, "google satellite": googleSat};
-
 <!-- BE SURE THIS IS THE LATEST UPDATE OF THE MASTER PARCEL FILE, AND THAT IT IS ACTUALLY CALLED 'trenton_master' OR EVERYTHING WILL BREAK!!! -->
 var parcelMasterURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/aebbd47a-5690-11e5-beed-0e853d047bba/viz.json';
-
 <!-- reference auxiliary data -->
-
 <!-- colors on redev areas layer are styled in cartodb bc i am lazy -->
 var redev_areasURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/c0afc7fc-5692-11e5-ac65-0e0c41326911/viz.json';
-
 <!-- colors and label on neighborhood layer are styled in cartodb -->
 var ngbhd_masterURL = 'https://restoringtrenton.cartodb.com/api/v2/viz/cb60f754-72a1-11e5-88a3-0e3ff518bd15/viz.json'; 
-
 <!-- colors and label on TDA layer are styled in cartodb -->
 var tda_URL = 'https://trenton-downtown.cartodb.com/api/v2/viz/c929e5fa-2781-11e6-a299-0e31c9be1b51/viz.json'; 
-
 var infoLayer = new L.geoJson();
 var formURL = '';
-
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
 cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction  FROM trenton_master");
-
 		$.getJSON(cartoURL_infolayer,
             function(data) {
 			
@@ -488,7 +441,6 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 				onEachFeature: function (feature, layer) {
 				var bounds = layer.getBounds();
 				var center = bounds.getCenter();
-
 				//sigh, we resort to creepy google again to make the form to report the issues. 
 				
 				var propAdd = feature.properties.address;
@@ -521,18 +473,12 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 				infoLayer.addTo(map);
 				
 		});
-
 <!-- array to hold the different overlay layers we're creating from different queries of the property database -->
   overlayLayers = {}; 
 		<!-- don't forget to add any new layers to the menu! -->
   var sublayers = [allPropsGet, vacantPropsGet, lienPropsGet, cityOwnedVacGet, tdaGet, redevAreaGet];
-
-
-
 <!-- basic parcel outlines - for some reason the layer selector breaks if this isn't loaded early. one day i'll learn why. -->
-
 var baseParcelLayer;
-
 cartodb.createLayer(map, parcelMasterURL)
     .addTo(map)
     .on('done', function(layer) { 
@@ -546,11 +492,9 @@ cartodb.createLayer(map, parcelMasterURL)
       baseParcelLayer = sublayer;
       console.log(baseParcelLayer);
 	  
-
      }).on('error', function() { 
       //log the error
     });
-
  	
   var allPropsGet = {
     sql: "SELECT * FROM trenton_master",
@@ -561,9 +505,7 @@ cartodb.createLayer(map, parcelMasterURL)
     sql: "SELECT * FROM trenton_master where parc_type like '%VACANT%'",
     cartocss: "#trenton_master[parc_type='VACANT LOT']{polygon-fill: #B9D132; polygon-opacity:0.5;line-color:#fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT BLDG'] {polygon-fill: #FF0000; polygon-opacity:0.5;line-color: #fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT LOWER'] {polygon-fill: #FF9900; polygon-opacity:0.6;line-color: #fff; line-opacity:0.4;}",
 	  }
-
  
-
   var lienPropsGet = {
     sql: "SELECT * FROM trenton_master where (city_liens > 0 or priv_liens > 0)",
     cartocss: "#trenton_properties{polygon-fill: #000; polygon-opacity:0.2;line-color:#00FFFF ; line-width: 2; line-opacity:0.7;}"
@@ -573,10 +515,8 @@ cartodb.createLayer(map, parcelMasterURL)
     sql: "SELECT * FROM trenton_master where (owner like '%CITY OF TRENTON%' and parc_type like '%VACANT%')",
     cartocss: "#trenton_properties{polygon-opacity:0;line-color:#FFFF00; line-width: 2; line-opacity:0.6;}"
   }
-
  var redevAreaGet = {
 	 sql: "SELECT * FROM redev_areas"}
-
  var tdaGet = {
 	 sql: "SELECT * FROM tda_boundary_clean"}
 	 
@@ -588,19 +528,15 @@ cartodb.createLayer(map, parcelMasterURL)
  //   sql: "SELECT * FROM trenton_master where owner = 'CITY OF TRENTON' and class = '2' and parc_type = 'VACANT BLDG' and redev_area is not NULL",
  //   cartocss: "#trenton_properties{polygon-fill: #00FBFF; polygon-opacity:0.2;line-color:#00FBFF ; line-width: 3; line-opacity:0.8;}"
  // }
-
  
   var auctionsGet = {
 	 sql: "SELECT * FROM auctionURL",
 	 cartocss: "#auctions{polygon-fill:...; ...}"
  }
   
-
-
  
  
 -->
-
 <!-- here are the vacants -->  
   cartodb.createLayer(map, parcelMasterURL)
     .addTo(map)
@@ -610,13 +546,11 @@ cartodb.createLayer(map, parcelMasterURL)
 	  sublayer.set(vacantPropsGet);
       sublayers.push(sublayer);
       overlayLayers["VACANT PROPERTIES"] = layer;
-
       layer.setInteraction(false);
 	  
      }).on('error', function() { 
       //log the error
     });
-
 	
 <!-- taking out the homestead layer since we don't KNOW YET, argh	-->
 //  cartodb.createLayer(map, parcelMasterURL)
@@ -632,8 +566,6 @@ cartodb.createLayer(map, parcelMasterURL)
 //     }).on('error', function() { 
       //log the error
 //    });
-
-
 <!-- enable the auction layer when there's an upcoming auction -->	
 /*  cartodb.createLayer(map, parcelMasterURL)
     .addTo(map)
@@ -649,7 +581,6 @@ cartodb.createLayer(map, parcelMasterURL)
       //log the error
     });
 */
-
 <!-- city-owned vacants -->
  cartodb.createLayer(map, parcelMasterURL)
     .on('done', function(layer) { 
@@ -659,12 +590,9 @@ cartodb.createLayer(map, parcelMasterURL)
       sublayers.push(sublayer);
       overlayLayers["CITY-OWNED VACANTS"] = layer;
       layer.setInteraction(false);
-
      }).on('error', function() { 
       //log the error
     });	
-
-
 	
 <!-- liens, whoo -->
   cartodb.createLayer(map, parcelMasterURL)
@@ -679,13 +607,11 @@ cartodb.createLayer(map, parcelMasterURL)
      }).on('error', function() { 
       //log the error
     });
-
 <!-- neighborhood boundaries -->
 cartodb.createLayer(map, ngbhd_masterURL)
     .on('done', function(layer) { 
       layer.setZIndex(13);
       var sublayer = layer.getSubLayer(0);
-
       sublayer.set(ngbhd_basicGet);
       sublayers.push(sublayer);
 	  layer.setInteraction(false);
@@ -700,7 +626,6 @@ cartodb.createLayer(map, tda_URL)
     .on('done', function(layer) { 
       layer.setZIndex(13);
       var sublayer = layer.getSubLayer(0);
-
       sublayer.set(tdaGet);
       sublayers.push(sublayer);
 	  layer.setInteraction(false);
@@ -715,7 +640,6 @@ cartodb.createLayer(map, redev_areasURL)
     .on('done', function(layer) { 
       layer.setZIndex(15);
       var sublayer = layer.getSubLayer(0);
-
       sublayer.set(redevAreaGet);
       sublayers.push(sublayer);
 	  layer.setInteraction(false);
@@ -723,21 +647,15 @@ cartodb.createLayer(map, redev_areasURL)
 	  
 	  <!-- YOU HAVE TO PUT THE LAYER SELECTOR IN THE LAST LAYER. DON'T $@^! ASK. -->
 	  L.control.layers(bases, overlayLayers, {position:'topleft', }).addTo(map);
-
-
-
      }).on('error', function() { 
       //log the error
     });
-
 <!-- DATA MODE SWITCHER -->	
-
 var listOn = 0;
 	
 	modeSwitcher.addTo(map);
 	
 	modeSwitcher.on('click', function() {
-
 	if (listOn !=1) {
 		modeList.style.display='block';
 		listOn = 1;
@@ -748,34 +666,32 @@ var listOn = 0;
 		listOn = 0;
 		}
 	});
-
 var whichMode='';
 	function displaySelectedMode(){
 		whichMode = $( "input:radio[name=mode]:checked" ).val();
 		console.log(whichMode);
-
 			if (whichMode == "crime_mode") { 
-          clearDrawnItems();
+ //         clearDrawnItems();
 					loadCrimeInterface();
 				}
 			
 			else if (whichMode =="ngbhd_mode") { 
-          clearDrawnItems();
+ //         clearDrawnItems();
 					loadNgbhdInterface();
 			}  
       
-      else if (whichMode =="sid_mode") { 
-          clearDrawnItems();
-          map.removeLayer(parcelPolygon);
-					sidMode();
-			} 
+//      else if (whichMode =="sid_mode") { 
+//          clearDrawnItems();
+//          map.removeLayer(parcelPolygon);
+//					sidMode();
+//			} 
       
 			else if (whichMode =="property_mode") {
 				map.removeLayer(crimeCluster);
 				map.removeLayer(crimeHeat);    
         baseParcelLayer.setInteraction(true);
-        clearDrawnItems();  
-        clearDraw();
+ //       clearDrawnItems();  
+ //       clearDraw();
 	
 				if (crimeButtonOn != 0){
 					crimeSidebarButton.removeFrom(map);
@@ -796,13 +712,9 @@ var whichMode='';
 				};
 			}
 	}
-
 ;
-
 <!-- END DATA MODE SWITCHER -->
-
 <!-- SEARCHES! -->
-
 <!-- QUICK ADDRESS SEARCH -->
 var quickSearchOn = 0;
   addSearchButton = new L.Control.Button(L.DomUtil.get('addsearchbutton'), { toggleButton: 'active' }).addTo(map);
@@ -823,20 +735,15 @@ var quickSearchOn = 0;
     } 
   
   });
-
 var parcelPolygon = new L.geoJson();
-
 function quickAddSearch() {
   addquery = document.getElementById("addSearchBox").value; 
  
   cartoURL = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master WHERE address ilike '%" + addquery + "%'");
   
  highlightPolygons();
-
-
 }
 <!-- END OF QUICK SEARCH FUNCTIONS -->
-
 <!-- ADVANCED PROPERTY SEARCH SIDEBAR -->
  
   var div_sidebar = document.createElement('div');
@@ -855,12 +762,10 @@ function quickAddSearch() {
 	searchButton.on('click', function () {
 		sidebar.toggle()
 	});
-
  
 <!-- ADVANCED SEARCH QUERY CONSTRUCTOR -->
  
   	function runQuery(){
-
 		map.removeLayer(parcelPolygon);
 		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=';
 		query_string = "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master";
@@ -907,7 +812,6 @@ function quickAddSearch() {
 			selections[input_count] = input_owner;
 			console.log (whereClause, input_owner, input_count, selections[input_count]);
 		}
-
 		if (input_owner_add != "") {
 			whereClause = " WHERE ";
 			input_owner_add = input_owner_add.toUpperCase();
@@ -926,7 +830,6 @@ function quickAddSearch() {
 			selections[input_count] = input_owner_add;
 			console.log (whereClause, input_owner_add, input_count, selections[input_count]);
 		}
-
 		
 		if (input_address != "") {
 			//add scrubber for North, South, etc. and street type
@@ -1017,9 +920,7 @@ function quickAddSearch() {
 		}
 				cartoURL = cartoURL + encodeURI(query_string);
                 console.log('calling url = '+ cartoURL);
-
 	  }
-
 	function mapSelection()
 	{
 		hideTable();
@@ -1031,7 +932,6 @@ function quickAddSearch() {
     highlightPolygons();
     
 	}
-
 function highlightPolygons(){    	
 			$.getJSON(cartoURL, function(data) {
 			
@@ -1075,7 +975,6 @@ function highlightPolygons(){
 		map.setView([40.224, -74.76], 15);
 		
      }
-
 	function downloadCSV()
 	{
 		runQuery();
@@ -1098,21 +997,17 @@ function highlightPolygons(){
 		runQuery();
 		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=CSV&filename=restoring_trenton_query.csv&q=';
 		cartoURL = cartoURL + encodeURI(query_string);
-
 		document.getElementById('queryTable').innerHTML = config.table_base;
 		var spinner = new Spinner().spin(spinBox);
 		$('#spinBox').show();
 		
 		d3.text(cartoURL, function(data) {
                 var parsedCSV = d3.csv.parseRows(data);
-
                 var container = d3.select("#queryTable")
                     .append("table")
-
                     .selectAll("tr")
                         .data(parsedCSV).enter()
                         .append("tr")
-
                     .selectAll("td")
                         .data(function(d) { return d; }).enter()
                         .append("td")
@@ -1123,15 +1018,12 @@ function highlightPolygons(){
 			});
 		document.getElementById('map').style.display = 'none';	
 		document.getElementById('queryTable').style.display = 'block';
-
 	}
 	function hideTable()
 	{
 		document.getElementById('queryTable').style.display = 'none';
 		document.getElementById('map').style.display = 'block';
 	}
-
-
 <!-- NEIGHBORHOOD SEARCH -->
 var ngbhdListOn = 0;
 var ngbhdList = [];
@@ -1140,7 +1032,6 @@ var planHoodList = ["TDA", "Greater Trenton", "Old Trenton (NRTC)", "Trenton His
 var redevList = [];
 ngbhdQueryURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * from ngbhd_master';
 redevQueryURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * from redevelopment_areas_all';
-
 //constructing the selectors
 //made the neighborhood one not do sub-neighborhoods because ... w/e.
 $.getJSON(ngbhdQueryURL, function(data) {
@@ -1175,11 +1066,7 @@ $.getJSON(redevQueryURL, function(data) {
         }) 
       redevList.sort();
     });
-
-
-
 //neighborhoodButton.addTo(map);
-
   ngbhdSearchContainer = new L.Control.Button(L.DomUtil.get('ngbhdsearchcontainer'), {position:'topleft'}).addTo(map);
   neighborhoodButton.on('click', function() {  
     document.getElementById("property_mode").checked=true;
@@ -1240,7 +1127,6 @@ function cityArea() {
     });
   
 }  
-
 var redevListSelectorContent = ''; 
 function redevArea() {
   map.removeLayer(parcelPolygon);
@@ -1281,12 +1167,9 @@ function redevArea() {
     });
   
 }
-
 	
 		
 <!-- END NEIGHBORHOOD SEARCH FUNCTIONS -->
-
-
 <!-- DASHBOARD SIDEBAR -->
  
   var dashboard_sidebar = document.createElement('div');
@@ -1299,9 +1182,7 @@ function redevArea() {
   });
 	map.addControl(dashboardSidebar);
 <!-- END DASHBOARD SIDEBAR -->
-
 <!-- RESET ON MODE CHANGE -->
-
 function clearNeighborhoods(){
   console.log("entering clearNeighborhoods");
 	if (!dashboardSidebar.isVisible()) {
@@ -1311,7 +1192,6 @@ function clearNeighborhoods(){
 		ngbhdSidebarButton.removeFrom(map);
 		ngbhdButtonOn = 0;
 	}; 
-
 	if ($.contains( document.ngbhdLayer, document.map )!=='false'){
 	  map.removeLayer(ngbhdLayer);
 	};  
@@ -1322,28 +1202,22 @@ function clearNeighborhoods(){
 	};
 	console.log("out of clearNeighborhoods");
 }
-
 function clearCrime() {
-
 	if (dashboardSidebar.isVisible()) {
 		dashboardSidebar.toggle();
 		}
-
-	if ($.contains( document.crimeHeat, document.map )!=='false'){
+	if ($.contains( document.crimeHeat, document.map )=='true'){
 	  map.removeLayer(crimeHeat);
 	}; 
   
-  if ($.contains( document.crimeCluster, document.map )!=='false'){
+  if ($.contains( document.crimeCluster, document.map )=='true'){
 	  map.removeLayer(crimeCluster);
 	};
-
   if (crimeButtonOn != 0){
 		crimeSidebarButton.removeFrom(map);
 		crimeButtonOn = 0;
 		};
-
 }
-
 function clearDraw() {
    if (drawButtonsOn!=0) {
       console.log("found draw buttons!");
@@ -1351,24 +1225,18 @@ function clearDraw() {
       deleteButton.removeFrom(map);  
       drawButtonsOn=0;
   }  
-  clearDrawnItems();
+//  clearDrawnItems();
 }
-
 <!-- END RESET BASED ON MODE -->
-
 <!-- CRIME DASHBOARD -->
-
 function crimeQuery() {
-
 	crimeSQL = '';
 	var crimeYearVariables = $('input:checkbox:checked.year').map(function () {
 	  return this.id;
 	}).get();
-
 	var crimeTypeVariables = $('input:checkbox:checked.crimecat').map(function () {
 	  return this.id;
 	}).get();
-
 	var typeSQL = '';
 	var yearSQL = '';
 	var andClause = '';
@@ -1376,7 +1244,6 @@ function crimeQuery() {
 	if ((crimeTypeVariables.length > 0) || (crimeYearVariables.length > 0)) {
 				crimeSQL = crimeSQL + ' WHERE';
 	}
-
 	if (crimeYearVariables.length > 0) {
 		yearSQL = " (year = '"+crimeYearVariables[0]+"'";
 		if (crimeYearVariables.length > 1) {
@@ -1386,7 +1253,6 @@ function crimeQuery() {
 			}
 		yearSQL = yearSQL+")";
 	}
-
 	if (crimeTypeVariables.length > 0) {
 	
 		if (crimeYearVariables.length > 0){
@@ -1399,29 +1265,27 @@ function crimeQuery() {
 		 typeSQL = typeSQL + ")";
 			
 	}
-
 	crimeSQL = crimeSQL + yearSQL + andClause + typeSQL;
 }	
-
 function drawCrime() {
   clearNeighborhoods();
-  clearDraw();
-	map.removeLayer(crimeCluster);
-	map.removeLayer(crimeHeat);
+//  clearDraw();
+	if ($.contains( document.crimeCluster, document.map )=='true'){
+	  map.removeLayer(crimeCluster);
+	}; 
 
+    if ($.contains( document.crimeHeat, document.map )=='true'){
+	  map.removeLayer(crimeHeat);
+	}; 
 	crimeCoords = [];
 	crimeCounter = 0;
-
 	
 crimeQuery();	
-
 console.log(crimeSQL);
-
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
 cartoURL_crimeData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM crime_master" + crimeSQL);
 console.log(cartoURL_crimeData);
-
 	crimeCluster = new L.markerClusterGroup(
 	{
 			disableClusteringAtZoom: 16 ,
@@ -1451,7 +1315,6 @@ console.log(cartoURL_crimeData);
 				pointToLayer: function(feature, latlng) {
 					return new L.CircleMarker(latlng, {radius: 10, fillOpacity: 0.9, color:"#fff"});
 				},
-
 				onEachFeature: function (feature, layer) {
 							
 				var crimePopup = "<b>"+ feature.properties.crime_cat.toUpperCase() +"</b>" +
@@ -1483,11 +1346,8 @@ console.log(cartoURL_crimeData);
 		if (!document.getElementById("incidents").checked) {
 			map.removeLayer(crimeCluster);
 		}
-
 	document.getElementById('crimeQueryResult').style.display = 'block';
 }
-
-
 function loadCrimeInterface() {
 	dashboardSidebar.setContent(config.crimeSidebar_content);
 	if (!dashboardSidebar.isVisible()) {
@@ -1510,13 +1370,9 @@ function loadCrimeInterface() {
 	
 	map.setZoom(13);
 	drawCrime();
-
 }
-
 function crimeHeatmap() {
-
 			dynamiczoomspecs();
-
 			$.getJSON(cartoURL_crimeData,
 				function(data) {
 				   
@@ -1546,7 +1402,6 @@ function crimeHeatmap() {
 					
 				});
 			}
-
  			function dynamiczoomspecs()
 			{	
 				var currzoom = map.getZoom();
@@ -1567,17 +1422,12 @@ map.on('zoomend', function(e){
 	});	
   
 <!-- END CRIME DASHBOARD -->
-
-
-
 <!-- NEIGHBORHOOD DASHBOARD -->
-
 var ngbhdSidebar_content ='';	
 var selectedIndicator = 'COMPOSITE';
-
 function loadNgbhdInterface() {
   clearCrime();
-  clearDraw();
+//  clearDraw();
 	dashboardSidebar.setContent(config.ngbhdSidebar_content);
 	if (!dashboardSidebar.isVisible()) {
 		dashboardSidebar.toggle();
@@ -1589,19 +1439,15 @@ function loadNgbhdInterface() {
 	map.removeLayer(ngbhdLayer);
 	
 	map.setZoom(13);
-
 	ngbhdSidebar_content = "<br>This is the interactive data portal for the <a style = 'text-decoration: none; font-weight:bold; color:#FF6600' 'href = 'http://www.restoringtrenton.org/#!neighborhood-conditions-study/zqams'>Neighborhood Conditions Study</a>. More details and the full report are <a style = 'text-decoration: none; font-weight:bold; color:#FF6600' href = 'http://www.restoringtrenton.org/#!neighborhood-conditions-study/zqams'>here</a>. <br><br><b>HOW THIS WORKS</B><br><br><li>You're currently seeing the <b>overall market conditions</b> -- a composite score we calculated for each neighborhood based on a bunch of indicators.</li><br><li>Click on a <b>neighborhood</b> to see its overall profile and a table of those indicators.</li><br><li>Click on an <b>indicator</b> to see a map of how different neighborhoods compare on that particular indicator. Scrolling over the map will show you the details for that indicator in each neighborhood.</li><br><li>Some indicators will also display a <b>chart</b> where you can see the trends for that indicator in the neighborhood over time.</li><br><li><b>Export</b> your dashboard by clicking the handy dandy .pdf button near the neighborhood's name.</li>"; 
 	document.getElementById("ngbhd_query_form").innerHTML = ngbhdSidebar_content;
 	
 	drawNgbhds();
 }
-
-
 function refreshNgbhds() {
 	map.removeLayer(ngbhdLayer);
 	drawNgbhds();   
 }
-
 //setting up the functions that call the chart
 var chartYears = [];
 var chartValues = [];
@@ -1610,22 +1456,18 @@ var yAxisTitle = '';
 var chartType = '';
 var seriesName = '';
 var chartSeries = [];
-
-
 function callVac() {
 	selectedIndicator = 'VACANCY';
 	chartValues=[];
 	document.getElementById('chartbox').innerHTML = '';
 	refreshNgbhds();
 }
-
 function callHo() {
 	selectedIndicator = 'HOMEOWNERSHIP';
 	chartValues=[];
 	document.getElementById('chartbox').innerHTML = '';
 	refreshNgbhds();
 }
-
 function callMSP() {
 	chartValues=[];
 	selectedIndicator = 'SALE PRICE';
@@ -1643,7 +1485,6 @@ function callMSP() {
 	makeChart();
 	refreshNgbhds();
 }
-
 function callDOM() {
 	chartValues=[];
 	selectedIndicator = 'SALE PRICE';
@@ -1659,7 +1500,6 @@ function callDOM() {
 	makeChart();
 	refreshNgbhds();
 }
-
 function callIP() {
 	chartValues=[];
 	selectedIndicator = 'INVESTORS';
@@ -1673,7 +1513,6 @@ function callIP() {
 	makeChart();
 	refreshNgbhds();
 }
-
 function callForc() {
 	chartValues =[];
 	selectedIndicator = 'FORECLOSURE';
@@ -1688,28 +1527,24 @@ function callForc() {
 	makeChart();
 	refreshNgbhds();
 }
-
 function callTaxDel() {
 	selectedIndicator = 'TAX DELINQUENCY';
 	chartValues=[];
 	document.getElementById('chartbox').innerHTML = '';
 	refreshNgbhds();
 }
-
 function callTaxLien() {
 	selectedIndicator = 'TAX LIENS BOUGHT';
 	chartValues=[];
 	document.getElementById('chartbox').innerHTML = '';
 	refreshNgbhds();
 }
-
 function callCrime() {
 	selectedIndicator = 'VIOLENT CRIME';
 	chartValues=[];
 	document.getElementById('chartbox').innerHTML = '';
 	refreshNgbhds();
 }
-
 function callComp() {
 	selectedIndicator = 'COMPOSITE';
 	chartValues=[];
@@ -1717,7 +1552,6 @@ function callComp() {
 	chartValues=[1,2,4,5];
 	refreshNgbhds();
 }
-
 		
 			dashboardSidebar.update = function(props) {
 				selNgbhd = props.nsa;
@@ -1743,10 +1577,8 @@ function callComp() {
 					"</div>";
 					document.getElementById("ngbhd_query_form").innerHTML = ngbhdSidebar_content;					
 				}
-
 var featureColor = 0;
 var selNgbhd = '';
-
 				function getColor(d) {
 					if (d==5) { return '#CCFFCC'; }
 					else if (d==4) {return '#99FFCC';}
@@ -1755,10 +1587,7 @@ var selNgbhd = '';
 					else if (d==1) {return '#009999';}
 					else return '#555555';
 				}					
-
-
 var legendContent = '';
-
 				
 function drawNgbhds() {
 	
@@ -1790,10 +1619,8 @@ cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 					layer.on({click: clickNgbhd, mouseover: highlight, mouseout:dehighlight});
 						}						
 					}).addTo(map)
-
 			
 				$('#spinBox').hide();
-
 			function clickNgbhd(e) {
 				var layer = e.target;
 				selNgbhd = layer.feature.properties.nsa;
@@ -1812,7 +1639,6 @@ cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 			}
 			
 			});
-
 			function style(feature) {
 			
 			if (selectedIndicator == 'VACANCY') {featureColor = feature.properties.vac;}
@@ -1849,7 +1675,6 @@ cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 				getLegend();
 				div.innerHTML = legendContent;
 			}
-
 			if (legendPresent == 0) {
 				legend.addTo(map);
 				legendPresent = 1;
@@ -1861,7 +1686,6 @@ cartoURL_ngbhdData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 			
 			
 }
-
 function getLegend() {
 				if (selectedIndicator == 'COMPOSITE') {
 				
@@ -1885,7 +1709,6 @@ function getLegend() {
 				}
 				}
 }
-
 function makeChart() {
 	chart = new Highcharts.Chart({
         chart: { renderTo: 'chartbox', type: chartType},
@@ -1895,19 +1718,14 @@ function makeChart() {
 		series: chartSeries,
 		plotOptions: {column:{color:'#FF9933'}}
 	});
-
 }
-
 function exportPDF() {
 	return xepOnline.Formatter.Format('ngbhd_query_form'); 
 }
-
 <!-- END NEIGHBORHOOD DASHBOARD -->
     
 //defining a bunch of crap for user-drawn polygons, SID calculations, etc.
-
     var drawnItemsJson; 
-
 /*    var poly = new L.Draw.Polygon(map, {
       shapeOptions: {
         color: 'purple'
@@ -1920,7 +1738,6 @@ function exportPDF() {
 					metric: false,
 					repeatMode: false
     });
-
     var drawnPoly;
         var allPropStats={count:0,value:0, taxes:0};  
         var class2Stats={count:0,value:0, taxes:0};
@@ -1935,12 +1752,9 @@ function exportPDF() {
         var other_cash=0;
         var totalRev=0; 
         
-
         var theoColl=0;
         var expColl=0;
-
 function resetStats() {
-
        allPropStats={count:0,value:0, taxes:0};  
        class2Stats={count:0,value:0, taxes:0};
        taxableStats={count:0,value:0, taxes:0}; 
@@ -1954,14 +1768,10 @@ function resetStats() {
        other_cash=0;
        totalRev=0; 
         
-
        theoColl=0;
        expColl=0;
-
 }
-
 function sidMode() {
-
     clearNeighborhoods();
     clearCrime();
     resetStats();     
@@ -1975,7 +1785,6 @@ function sidMode() {
     
    
 		} 
-
 function clearDrawnItems() {
   resetStats();    
   if (map.hasLayer(drawnItems)  ) {       
@@ -1983,7 +1792,6 @@ function clearDrawnItems() {
           drawnItems = L.FeatureGroup(); 
     }
 } 
-
    function drawShape() {     
    
       clearDrawnItems();
@@ -2012,8 +1820,6 @@ function clearDrawnItems() {
    
     		var type = e.layerType,
 				layer = e.layer;
-
-
 			drawnItems.addLayer(layer);
       drawnItems.addTo(map); 
       
@@ -2025,7 +1831,6 @@ function clearDrawnItems() {
       baseParcelLayer.setInteraction(true); 
       document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil fa-2x'></i>"; 
           
-
       });
     } 
     
@@ -2037,7 +1842,6 @@ function clearDrawnItems() {
         resetStats();
     
       }
-
     }  
        
       function findIfInside(){  
@@ -2051,7 +1855,6 @@ function clearDrawnItems() {
             function(data) {      
 			
 	      infoLayer = L.geoJson(data, {
-
           onEachFeature: function (feature, layer) {  
          
 //          if (drawnPoly.getBounds().contains([feature.geometry.coordinates[1], feature.geometry.coordinates[0]])) {  
@@ -2064,11 +1867,9 @@ function clearDrawnItems() {
             
               if (turf.inside(turf.centroid(feature), drawnItemsJson.features[0])) { 
               //pull the class 2 residential props out and treat them separately -- update if other classes need to be removed
-
                 allPropStats.count ++;
                 allPropStats.value += parseInt(feature.properties.totalassmt);  
                 allPropStats.taxes += feature.properties.taxes;
-
               if (feature.properties.class=='2') {
                 console.log("class 2");
                 class2Stats.count ++;  
@@ -2147,7 +1948,6 @@ function clearDrawnItems() {
              "<b>YOUR ANNUAL BUDGET: </B>" +             
              "&nbsp &nbsp<b><output id='annualBudget'>" + totalRev + "</output></b>" +
              "<hr>"
-
              ;
         
         
@@ -2155,7 +1955,6 @@ function clearDrawnItems() {
           .setLatLng(drawnPoly.getBounds().getNorthWest())
           .setContent(sidPopup) 
           .openOn(map);
-
           drawnItems.eachLayer(function(layer) {
             layer.bindPopup(sidResult);  
             
@@ -2196,11 +1995,9 @@ function clearDrawnItems() {
 */
 function ngbhdSearchMode() {
   
-
-
 }
     
   
 </script>
 </body>
-</html>  
+</html>
