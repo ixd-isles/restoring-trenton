@@ -378,8 +378,10 @@ var modeSwitcher = new L.Control.Button(L.DomUtil.get('data_list'), {position:'t
 var crimeData = new L.geoJson();
 var crimeSQL = "";
 var crimeCluster;
+var clusterOn = 0;
 var crimeCoords = [];
 var crimeHeat = L.heatLayer();
+var heatOn = 0;
 var ngbhdSQL = "";
 var ngbhdLayer = new L.geoJson();
 var crimeButtonOn = 0;
@@ -687,8 +689,16 @@ var whichMode='';
 //			} 
       
 			else if (whichMode =="property_mode") {
-				map.removeLayer(crimeCluster);
-				map.removeLayer(crimeHeat);    
+   
+	if (heatOn != 0){
+	  map.removeLayer(crimeHeat);
+	  heatOn = 0;
+	}; 
+		if (clusterOn != 0){
+	  map.removeLayer(crimeCluster);
+	  clusterOn = 0;
+	}; 
+				
         baseParcelLayer.setInteraction(true);
  //       clearDrawnItems();  
  //       clearDraw();
@@ -1206,12 +1216,14 @@ function clearCrime() {
 	if (dashboardSidebar.isVisible()) {
 		dashboardSidebar.toggle();
 		}
-	if ($.contains( document.crimeHeat, document.map )=='true'){
+	if (heatOn != 0){
 	  map.removeLayer(crimeHeat);
+	  heatOn =0;
 	}; 
   
-  if ($.contains( document.crimeCluster, document.map )=='true'){
+  if (clusterOn != 0){
 	  map.removeLayer(crimeCluster);
+	  clusterOn = 0;
 	};
   if (crimeButtonOn != 0){
 		crimeSidebarButton.removeFrom(map);
@@ -1270,12 +1282,14 @@ function crimeQuery() {
 function drawCrime() {
   clearNeighborhoods();
 //  clearDraw();
-	if ($.contains( document.crimeCluster, document.map )=='true'){
+	if (clusterOn != 0){
 	  map.removeLayer(crimeCluster);
+	  clusterOn = 0;
 	}; 
 
-    if ($.contains( document.crimeHeat, document.map )=='true'){
+    if (heatOn != 0){
 	  map.removeLayer(crimeHeat);
+	  heatOn = 0;
 	}; 
 	crimeCoords = [];
 	crimeCounter = 0;
@@ -1337,6 +1351,7 @@ console.log(cartoURL_crimeData);
 		
 		if (document.getElementById("incidents").checked) {
 			crimeCluster.addTo(map);
+			clusterOn =1;
 		}
 		
 		if (document.getElementById("heatmap").checked) {
@@ -1345,6 +1360,7 @@ console.log(cartoURL_crimeData);
 		
 		if (!document.getElementById("incidents").checked) {
 			map.removeLayer(crimeCluster);
+			clusterOn = 0;
 		}
 	document.getElementById('crimeQueryResult').style.display = 'block';
 }
@@ -1399,6 +1415,7 @@ function crimeHeatmap() {
 				
 				console.log("crimeCounter = " + crimeCounter + " and heatIntensity = "+ heatIntensity);
 					crimeHeat = L.heatLayer(crimeCoords, {radius: relsize, blur: relsize, max:heatIntensity}).addTo(map);
+					heatOn = 1;
 					
 				});
 			}
@@ -1415,7 +1432,7 @@ function crimeHeatmap() {
 	
 map.on('zoomend', function(e){
 	console.log('map zoomed');
-	if ($.contains( document.crimeHeat, document.map )!=='false'){
+	if (heatOn != 0){
 		dynamiczoomspecs();
 		crimeHeat.redraw();
 	}
