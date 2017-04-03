@@ -499,22 +499,22 @@ cartodb.createLayer(map, parcelMasterURL)
     });
  	
   var allPropsGet = {
-    sql: "SELECT * FROM trenton_master",
+    sql: "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master",
     cartocss: "#trenton_properties{polygon-fill: #fff; polygon-opacity:0;line-color:#999; line-opacity:0.2;} #trenton_properties[parc_type='OPEN SPACE OR CEMETERY'] {polygon-fill:#259073; polygon-opacity:.3;}",
   }
   
   var vacantPropsGet = {
-    sql: "SELECT * FROM trenton_master where parc_type like '%VACANT%'",
+    sql: "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom FROM trenton_master where parc_type like '%VACANT%'",
     cartocss: "#trenton_master[parc_type='VACANT LOT']{polygon-fill: #B9D132; polygon-opacity:0.5;line-color:#fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT BLDG'] {polygon-fill: #FF0000; polygon-opacity:0.5;line-color: #fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT LOWER'] {polygon-fill: #FF9900; polygon-opacity:0.6;line-color: #fff; line-opacity:0.4;}",
 	  }
  
   var lienPropsGet = {
-    sql: "SELECT * FROM trenton_master where (city_liens > 0 or priv_liens > 0)",
+    sql: "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom FROM trenton_master where (city_liens > 0 or priv_liens > 0)",
     cartocss: "#trenton_properties{polygon-fill: #000; polygon-opacity:0.2;line-color:#00FFFF ; line-width: 2; line-opacity:0.7;}"
   }
   
     var cityOwnedVacGet = {
-    sql: "SELECT * FROM trenton_master where (owner like '%CITY OF TRENTON%' and parc_type like '%VACANT%')",
+    sql: "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master where (owner like '%CITY OF TRENTON%' and parc_type like '%VACANT%')",
     cartocss: "#trenton_properties{polygon-opacity:0;line-color:#FFFF00; line-width: 2; line-opacity:0.6;}"
   }
  var redevAreaGet = {
