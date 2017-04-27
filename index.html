@@ -11,6 +11,9 @@
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
 
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.3/leaflet.draw.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.3/leaflet.draw.js'></script>
+
 
 <script src="L.GeoSearch/js/l.control.geosearch.js"></script>
 <script src="L.GeoSearch/js/l.geosearch.provider.google.js"></script>
@@ -84,6 +87,7 @@
 	<HR>
 	<input type="radio" name="mode" id="crime_mode" value="crime_mode" onchange="displaySelectedMode()">CRIME</input><BR>
 	<input type="radio" name="mode" id="ngbhd_mode" value="ngbhd_mode" onchange="displaySelectedMode()">NEIGHBORHOODS</input><BR>
+    <input type="radio" name="mode" id="ngbhd_mode" value="sid_mode" onchange="displaySelectedMode()">SID CALCULATOR</input><BR>
 	<hr>
 
 	<input type="radio" name="mode" id="property_mode" value="property_mode" onchange="displaySelectedMode()" checked>PROPERTIES</input>
@@ -499,22 +503,22 @@ cartodb.createLayer(map, parcelMasterURL)
     });
  	
   var allPropsGet = {
-    sql: "SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction from trenton_master",
+    sql: "SELECT * FROM trenton_master",
     cartocss: "#trenton_properties{polygon-fill: #fff; polygon-opacity:0;line-color:#999; line-opacity:0.2;} #trenton_properties[parc_type='OPEN SPACE OR CEMETERY'] {polygon-fill:#259073; polygon-opacity:.3;}",
   }
   
   var vacantPropsGet = {
-    sql: "SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction FROM trenton_master where parc_type like '%VACANT%'",
+    sql: "SELECT * FROM trenton_master where parc_type like '%VACANT%'",
     cartocss: "#trenton_master[parc_type='VACANT LOT']{polygon-fill: #B9D132; polygon-opacity:0.5;line-color:#fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT BLDG'] {polygon-fill: #FF0000; polygon-opacity:0.5;line-color: #fff; line-opacity:0.4;} #trenton_master[parc_type = 'VACANT LOWER'] {polygon-fill: #FF9900; polygon-opacity:0.6;line-color: #fff; line-opacity:0.4;}",
 	  }
  
   var lienPropsGet = {
-    sql: "SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction FROM trenton_master where (city_liens > 0 or priv_liens > 0)",
+    sql: "SELECT * FROM trenton_master where (city_liens > 0 or priv_liens > 0)",
     cartocss: "#trenton_properties{polygon-fill: #000; polygon-opacity:0.2;line-color:#00FFFF ; line-width: 2; line-opacity:0.7;}"
   }
   
     var cityOwnedVacGet = {
-    sql: "SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction from trenton_master where (owner like '%CITY OF TRENTON%' and parc_type like '%VACANT%')",
+    sql: "SELECT * FROM trenton_master where (owner like '%CITY OF TRENTON%' and parc_type like '%VACANT%')",
     cartocss: "#trenton_properties{polygon-opacity:0;line-color:#FFFF00; line-width: 2; line-opacity:0.6;}"
   }
  var redevAreaGet = {
@@ -673,20 +677,20 @@ var whichMode='';
 		whichMode = $( "input:radio[name=mode]:checked" ).val();
 		console.log(whichMode);
 			if (whichMode == "crime_mode") { 
- //         clearDrawnItems();
+          clearDrawnItems();
 					loadCrimeInterface();
 				}
 			
 			else if (whichMode =="ngbhd_mode") { 
- //         clearDrawnItems();
+         clearDrawnItems();
 					loadNgbhdInterface();
 			}  
       
-//      else if (whichMode =="sid_mode") { 
-//          clearDrawnItems();
-//          map.removeLayer(parcelPolygon);
-//					sidMode();
-//			} 
+      else if (whichMode =="sid_mode") { 
+          clearDrawnItems();
+          map.removeLayer(parcelPolygon);
+					sidMode();
+			} 
       
 			else if (whichMode =="property_mode") {
    
@@ -700,8 +704,8 @@ var whichMode='';
 	}; 
 				
         baseParcelLayer.setInteraction(true);
- //       clearDrawnItems();  
- //       clearDraw();
+       clearDrawnItems();  
+       clearDraw();
 	
 				if (crimeButtonOn != 0){
 					crimeSidebarButton.removeFrom(map);
@@ -1281,7 +1285,7 @@ function crimeQuery() {
 }	
 function drawCrime() {
   clearNeighborhoods();
-//  clearDraw();
+  clearDraw();
 	if (clusterOn != 0){
 	  map.removeLayer(crimeCluster);
 	  clusterOn = 0;
@@ -1444,7 +1448,7 @@ var ngbhdSidebar_content ='';
 var selectedIndicator = 'COMPOSITE';
 function loadNgbhdInterface() {
   clearCrime();
-//  clearDraw();
+  clearDraw();
 	dashboardSidebar.setContent(config.ngbhdSidebar_content);
 	if (!dashboardSidebar.isVisible()) {
 		dashboardSidebar.toggle();
@@ -1743,7 +1747,7 @@ function exportPDF() {
     
 //defining a bunch of crap for user-drawn polygons, SID calculations, etc.
     var drawnItemsJson; 
-/*    var poly = new L.Draw.Polygon(map, {
+    var poly = new L.Draw.Polygon(map, {
       shapeOptions: {
         color: 'purple'
       }, allowIntersection: false,
@@ -1756,6 +1760,7 @@ function exportPDF() {
 					repeatMode: false
     });
     var drawnPoly;
+	var drawnPolyBounds;
         var allPropStats={count:0,value:0, taxes:0};  
         var class2Stats={count:0,value:0, taxes:0};
         var taxableStats={count:0,value:0, taxes:0}; 
@@ -1838,12 +1843,14 @@ function clearDrawnItems() {
     		var type = e.layerType,
 				layer = e.layer;
 			drawnItems.addLayer(layer);
+			drawnPolyBounds = layer.getBounds();
+			console.log(drawnPolyBounds);
       drawnItems.addTo(map); 
       
       drawnItemsJson = drawnItems.toGeoJSON();  
       console.log( drawnItemsJson.features[0]);  
       
-      drawnPoly = L.geoJson(drawnItemsJson);   
+      drawnPoly = L.geoJson(drawnItemsJson);  
       poly.disable();    
       baseParcelLayer.setInteraction(true); 
       document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil fa-2x'></i>"; 
@@ -1862,8 +1869,11 @@ function clearDrawnItems() {
     }  
        
       function findIfInside(){  
-      
-      var loadEmAll = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM trenton_master")
+	  console.log('inside findIfInside');
+	  
+      var loadEmAll = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom , taxes, totalassmt, city_liens, priv_liens FROM trenton_master");
+	  
+// && ST_SetSRID(ST_MakeBox2D(ST_Point("+drawnItems.getbounds()+"), ST_Point("+drawnItems.getbounds()+")), 4326)
       
       var spinner = new Spinner().spin(spinBox);
       $('#spinBox').show();
@@ -1874,15 +1884,16 @@ function clearDrawnItems() {
 	      infoLayer = L.geoJson(data, {
           onEachFeature: function (feature, layer) {  
          
-//          if (drawnPoly.getBounds().contains([feature.geometry.coordinates[1], feature.geometry.coordinates[0]])) {  
+  //        if (drawnPoly.getBounds().contains([feature.geometry.coordinates[1], feature.geometry.coordinates[0]])) {  
           
-//            lat = feature.geometry.coordinates[1];
-//            lng = feature.geometry.coordinates[0]; 
-             
-//            var centroid = turf.centroid(feature);
-//            var inside = turf.inside(centroid, drawnItemsJson.features[0]);  
+ //           lat = feature.geometry.coordinates[1];
+ //           lng = feature.geometry.coordinates[0]; 
+//			console.log(lat, lng);
+            var centroid = turf.centroid(feature);
+            var inside = turf.inside(centroid, drawnItemsJson.features[0]);  
             
               if (turf.inside(turf.centroid(feature), drawnItemsJson.features[0])) { 
+			  console.log("in!");
               //pull the class 2 residential props out and treat them separately -- update if other classes need to be removed
                 allPropStats.count ++;
                 allPropStats.value += parseInt(feature.properties.totalassmt);  
@@ -1897,7 +1908,7 @@ function clearDrawnItems() {
                 
               //everything else is in principle taxable...
               else { 
-              
+              console.log("not class 2");
                     taxableStats.count ++; 
                     taxableStats.value += parseInt(feature.properties.totalassmt);  
                     taxableStats.taxes += feature.properties.taxes;  
@@ -1918,17 +1929,19 @@ function clearDrawnItems() {
                 }             
              
               } 
-                                                                                        
-                
               theoColl = accounting.formatMoney(rateSet*taxedStats.taxes/100) ;
               expColl =  accounting.formatMoney(rateSet*(taxedStats.taxes-defaultStats.taxes)/100)  ;   
-              totalRev = accounting.formatMoney(expColl);
+              totalRev = accounting.formatMoney(expColl);	                                                                      
+                
+
               }
-              }           
+              }
+             		  
              
-           
+  
             
         });
+ 
         				$('#spinBox').hide();
         
                 
@@ -1966,7 +1979,7 @@ function clearDrawnItems() {
              "&nbsp &nbsp<b><output id='annualBudget'>" + totalRev + "</output></b>" +
              "<hr>"
              ;
-        
+     
         
         var sidResult = L.popup({maxWidth:'auto'})
           .setLatLng(drawnPoly.getBounds().getNorthWest())
@@ -1976,9 +1989,9 @@ function clearDrawnItems() {
             layer.bindPopup(sidResult);  
             
             });
-           
+ 		        });             
         
-        });    
+   
         }
     
     
@@ -2009,7 +2022,7 @@ function clearDrawnItems() {
           console.log(model, city, county, state_cash, other_cash);
         
         } 
-*/
+
 function ngbhdSearchMode() {
   
 }
