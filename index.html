@@ -437,7 +437,7 @@ var infoLayer = new L.geoJson();
 var formURL = '';
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
-cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction  FROM trenton_master");
+cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction  FROM trenton_master WHERE parc_type ilike '%VACANT%'");
 		$.getJSON(cartoURL_infolayer,
             function(data) {
 			
