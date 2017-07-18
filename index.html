@@ -437,7 +437,7 @@ var infoLayer = new L.geoJson();
 var formURL = '';
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
-cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, zone_abrv, city_liens, priv_liens, redev_area, auction  FROM trenton_master WHERE parc_type like '%VACANT%'");
+cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, zone_abrv, city_liens, priv_liens, redev_area  FROM trenton_master WHERE parc_type like '%VACANT%'");
 		$.getJSON(cartoURL_infolayer,
             function(data) {
 			
@@ -469,9 +469,8 @@ cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?
 									"<br>LIENS (CITY): $" + feature.properties.city_liens + 
 									"<br>LIENS (PRIVATE): $" + feature.properties.priv_liens + 
 									"<hr><b>LAND USE INFO</B><BR>REDEV'T AREA: " + feature.properties.redev_area + 
-									"<br>ZONING: "+feature.properties.zone_abrv+ 
-									"<hr><b>ACTIONS</B>"+ 
-									"<br>CITY AUCTION: " + feature.properties.auction;
+									"<br>ZONING: "+feature.properties.zone_abrv; 
+	
 				layer.bindPopup(popupContent);
 				}
 			});
@@ -753,7 +752,7 @@ var parcelPolygon = new L.geoJson();
 function quickAddSearch() {
   addquery = document.getElementById("addSearchBox").value; 
  
-  cartoURL = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, auction, cartodb_id, the_geom from trenton_master WHERE address ilike '%" + addquery + "%'");
+  cartoURL = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, cartodb_id, the_geom from trenton_master WHERE address ilike '%" + addquery + "%'");
   
  highlightPolygons();
 }
@@ -782,7 +781,7 @@ function quickAddSearch() {
   	function runQuery(){
 		map.removeLayer(parcelPolygon);
 		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=';
-		query_string = "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, auction, cartodb_id, the_geom from trenton_master";
+		query_string = "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, cartodb_id, the_geom from trenton_master";
 		var input_parc_type = $('#SR_parc_type').val();
 		var input_zoning = $('#SR_zoning').val();
 		var input_owner = $('#SR_owner').val();
@@ -958,7 +957,7 @@ function highlightPolygons(){
 								var formURL="https://docs.google.com/forms/d/11QPK0sF29VREQR3ke-Td3EUd1LoCh9UbHR8um8xSOrY/viewform?entry.1233008467="+propAdd+"&entry.492807532="+cartodbID+"&entry.935525454="+center+"&entry.1771840456&entry.1915372513&entry.2060863861&entry.1480924992&entry.1569579456";
 				
 				 
-					var popupContent = "<b>"+ feature.properties.address + "</b><br>"+ feature.properties.parc_type+"<hr><b><a target = 'blank' href='"+ formURL + "'>REPORT AN ISSUE</a></b>" +"<hr><b>OWNER</B><BR>"+feature.properties.owner+"<br>"+feature.properties.ownstreet+"<br>"+feature.properties.owncity+"<br><br><B>CONDITIONS</B>: "+feature.properties.conditions+"<br><B>FIELD NOTES</B>: "+feature.properties.notes+"<hr><B>TAX INFO</B><BR>TAXES: $"+feature.properties.taxes+"<br>ASSESSED: $"+feature.properties.totalassmt +"<br>LIENS (CITY): $"+feature.properties.city_liens+"<br>LIENS (PRIVATE): $"+feature.properties.priv_liens+"<hr><b>LAND USE INFO</B><BR>REDEV'T AREA: "+feature.properties.redev_area+"<br>ZONING: "+feature.properties.zone_abrv+"&nbsp"+feature.properties.descrip +"<hr><b>ACTIONS</B><br>CITY AUCTION: "+feature.properties.auction;
+					var popupContent = "<b>"+ feature.properties.address + "</b><br>"+ feature.properties.parc_type+"<hr><b><a target = 'blank' href='"+ formURL + "'>REPORT AN ISSUE</a></b>" +"<hr><b>OWNER</B><BR>"+feature.properties.owner+"<br>"+feature.properties.ownstreet+"<br>"+feature.properties.owncity+"<br><br><B>CONDITIONS</B>: "+feature.properties.conditions+"<br><B>FIELD NOTES</B>: "+feature.properties.notes+"<hr><B>TAX INFO</B><BR>TAXES: $"+feature.properties.taxes+"<br>ASSESSED: $"+feature.properties.totalassmt +"<br>LIENS (CITY): $"+feature.properties.city_liens+"<br>LIENS (PRIVATE): $"+feature.properties.priv_liens+"<hr><b>LAND USE INFO</B><BR>REDEV'T AREA: "+feature.properties.redev_area+"<br>ZONING: "+feature.properties.zone_abrv;
 					layer.bindPopup(popupContent);
 					}
 				});
