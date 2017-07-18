@@ -437,7 +437,7 @@ var infoLayer = new L.geoJson();
 var formURL = '';
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
-cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, waiv_type, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction  FROM trenton_master WHERE parc_type like '%VACANT%'");
+cartoURL_infolayer = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom, address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, taxes, totalassmt, zone_abrv, city_liens, priv_liens, redev_area, foreclosed, auction  FROM trenton_master WHERE parc_type like '%VACANT%'");
 		$.getJSON(cartoURL_infolayer,
             function(data) {
 			
@@ -753,7 +753,7 @@ var parcelPolygon = new L.geoJson();
 function quickAddSearch() {
   addquery = document.getElementById("addSearchBox").value; 
  
-  cartoURL = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master WHERE address ilike '%" + addquery + "%'");
+  cartoURL = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master WHERE address ilike '%" + addquery + "%'");
   
  highlightPolygons();
 }
@@ -782,7 +782,7 @@ function quickAddSearch() {
   	function runQuery(){
 		map.removeLayer(parcelPolygon);
 		cartoURL = 'https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=';
-		query_string = "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, waiv_type, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master";
+		query_string = "SELECT address, parc_type, owner, ownstreet, owncity, conditions, notes, leadlot, class, taxes, bldgassmt, totalassmt, lastsold, saleprice, city_liens, priv_liens, zone_abrv, descrip, redev_area, foreclosed, auction, cartodb_id, the_geom from trenton_master";
 		var input_parc_type = $('#SR_parc_type').val();
 		var input_zoning = $('#SR_zoning').val();
 		var input_owner = $('#SR_owner').val();
