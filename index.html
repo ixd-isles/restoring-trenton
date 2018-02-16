@@ -702,7 +702,7 @@ var whichMode='';
 	  clusterOn = 0;
 	}; 
 				
-        baseParcelLayer.setInteraction(true);
+        baseParcelLayer.setInteraction(false);
        clearDrawnItems();  
        clearDraw();
 	
@@ -1821,7 +1821,7 @@ function clearDrawnItems() {
       poly.disable();  
       document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil fa-2x'></i>"; 
       shapeDrawOn = 0;
-      baseParcelLayer.setInteraction(true); 
+      baseParcelLayer.setInteraction(false); 
       resetStats();
    
     }
@@ -1851,7 +1851,7 @@ function clearDrawnItems() {
       
       drawnPoly = L.geoJson(drawnItemsJson);  
       poly.disable();    
-      baseParcelLayer.setInteraction(true); 
+      baseParcelLayer.setInteraction(false); 
       document.getElementById('drawbutton').innerHTML = "<i class='fa fa-pencil fa-2x'></i>"; 
           
       });
