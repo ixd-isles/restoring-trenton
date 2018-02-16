@@ -495,7 +495,6 @@ cartodb.createLayer(map, parcelMasterURL)
                     
       layer.setInteraction(false);  
       baseParcelLayer = sublayer;
-      console.log(baseParcelLayer);
 	  
      }).on('error', function() { 
       //log the error
@@ -674,7 +673,7 @@ var listOn = 0;
 var whichMode='';
 	function displaySelectedMode(){
 		whichMode = $( "input:radio[name=mode]:checked" ).val();
-		console.log(whichMode);
+//		console.log(whichMode);
 			if (whichMode == "crime_mode") { 
           clearDrawnItems();
 					loadCrimeInterface();
@@ -800,21 +799,21 @@ function quickAddSearch() {
 			input_parc_type = "parc_type is not null";
 			input_count = input_count+1;
 			selections[input_count] = input_parc_type;
-			console.log (whereClause, input_parc_type, input_count, selections[input_count]);
+//			console.log (whereClause, input_parc_type, input_count, selections[input_count]);
 		}
 		else{
 			whereClause = " WHERE ";
 			input_parc_type = "parc_type = '" + input_parc_type + "'";
 			input_count = input_count+1;
 			selections[input_count] = input_parc_type;
-			console.log (whereClause, input_parc_type, input_count, selections[input_count]);
+//			console.log (whereClause, input_parc_type, input_count, selections[input_count]);
 		}
 		
 		if (input_zoning != 'ANY'){
 			input_zoning = "descrip = '" + input_zoning + "'";
 			input_count = input_count+1;
 			selections[input_count] = input_zoning;
-			console.log (whereClause, input_zoning, input_count, selections[input_count]);
+//			console.log (whereClause, input_zoning, input_count, selections[input_count]);
 			}
 		
 		if (input_owner != "") {
@@ -823,7 +822,7 @@ function quickAddSearch() {
 			input_owner = "owner ilike '%"+ input_owner + "%'";
 			input_count = input_count+1;
 			selections[input_count] = input_owner;
-			console.log (whereClause, input_owner, input_count, selections[input_count]);
+//			console.log (whereClause, input_owner, input_count, selections[input_count]);
 		}
 		if (input_owner_add != "") {
 			whereClause = " WHERE ";
@@ -841,7 +840,7 @@ function quickAddSearch() {
 			input_owner_add = "(" + input_owner_add + ")";
 			input_count = input_count+1;
 			selections[input_count] = input_owner_add;
-			console.log (whereClause, input_owner_add, input_count, selections[input_count]);
+//			console.log (whereClause, input_owner_add, input_count, selections[input_count]);
 		}
 		
 		if (input_address != "") {
@@ -851,7 +850,7 @@ function quickAddSearch() {
 			input_address = "address ilike '%" + input_address + "%'";
 			input_count = input_count+1;
 			selections[input_count] = input_address;
-			console.log (whereClause, input_address, input_count, selections[input_count]);
+//			console.log (whereClause, input_address, input_count, selections[input_count]);
 		}
 		
 		if (document.getElementById("SR_class").checked) {
@@ -919,7 +918,7 @@ function quickAddSearch() {
 			}
 				
 			selections[input_count] = optionClause;
-			console.log (whereClause, optionClause, input_count, selections[input_count]);
+//			console.log (whereClause, optionClause, input_count, selections[input_count]);
 		}
 		
 		query_string = query_string + whereClause + selections[1];
@@ -932,7 +931,7 @@ function quickAddSearch() {
 		
 		}
 				cartoURL = cartoURL + encodeURI(query_string);
-                console.log('calling url = '+ cartoURL);
+ //               console.log('calling url = '+ cartoURL);
 	  }
 	function mapSelection()
 	{
@@ -1197,7 +1196,7 @@ function redevArea() {
 <!-- END DASHBOARD SIDEBAR -->
 <!-- RESET ON MODE CHANGE -->
 function clearNeighborhoods(){
-  console.log("entering clearNeighborhoods");
+//  console.log("entering clearNeighborhoods");
 	if (!dashboardSidebar.isVisible()) {
 		dashboardSidebar.toggle();
 		}
@@ -1213,7 +1212,7 @@ function clearNeighborhoods(){
 		legend.removeFrom(map);
 		legendPresent = 0;
 	};
-	console.log("out of clearNeighborhoods");
+//	console.log("out of clearNeighborhoods");
 }
 function clearCrime() {
 	if (dashboardSidebar.isVisible()) {
@@ -1235,7 +1234,7 @@ function clearCrime() {
 }
 function clearDraw() {
    if (drawButtonsOn!=0) {
-      console.log("found draw buttons!");
+//      console.log("found draw buttons!");
       drawButton.removeFrom(map);
       deleteButton.removeFrom(map);  
       drawButtonsOn=0;
@@ -1298,11 +1297,11 @@ function drawCrime() {
 	crimeCounter = 0;
 	
 crimeQuery();	
-console.log(crimeSQL);
+//console.log(crimeSQL);
 var spinner = new Spinner().spin(spinBox);
 $('#spinBox').show();
 cartoURL_crimeData = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM crime_master" + crimeSQL);
-console.log(cartoURL_crimeData);
+//console.log(cartoURL_crimeData);
 	crimeCluster = new L.markerClusterGroup(
 	{
 			disableClusteringAtZoom: 16 ,
@@ -1416,7 +1415,7 @@ function crimeHeatmap() {
 				    heatIntensity = .02;
 				}
 				
-				console.log("crimeCounter = " + crimeCounter + " and heatIntensity = "+ heatIntensity);
+//				console.log("crimeCounter = " + crimeCounter + " and heatIntensity = "+ heatIntensity);
 					crimeHeat = L.heatLayer(crimeCoords, {radius: relsize, blur: relsize, max:heatIntensity}).addTo(map);
 					heatOn = 1;
 					
@@ -1430,11 +1429,11 @@ function crimeHeatmap() {
 					relsize = (currzoom - 10)*2.2;
 				}
 				crimeHeat.setOptions({radius:relsize, blur:relsize});
-				console.log('currzoom = '+currzoom+' and relsize = '+relsize);
+//				console.log('currzoom = '+currzoom+' and relsize = '+relsize);
 			}
 	
 map.on('zoomend', function(e){
-	console.log('map zoomed');
+//	console.log('map zoomed');
 	if (heatOn != 0){
 		dynamiczoomspecs();
 		crimeHeat.redraw();
@@ -1495,8 +1494,8 @@ function callMSP() {
 		for (i = 0; i<=arguments.length-1; i++) {
 			chartValues[i]=arguments[i];
 		}
-		console.log(chartYears);
-		console.log(chartValues);
+//		console.log(chartYears);
+//		console.log(chartValues);
 	chartTitle='median sales price';
 	chartType='line';
 	yAxisTitle='$ 000s';
@@ -1800,7 +1799,7 @@ function sidMode() {
           drawButton.addTo(map);
           deleteButton.addTo(map); 
           drawButtonsOn=1; 
-          console.log(drawButtonsOn); 
+  //        console.log(drawButtonsOn); 
       }
     map.on('draw:created', function() {findIfInside()});
     
@@ -1843,11 +1842,11 @@ function clearDrawnItems() {
 				layer = e.layer;
 			drawnItems.addLayer(layer);
 			drawnPolyBounds = layer.getBounds();
-			console.log(drawnPolyBounds);
+//			console.log(drawnPolyBounds);
       drawnItems.addTo(map); 
       
       drawnItemsJson = drawnItems.toGeoJSON();  
-      console.log( drawnItemsJson.features[0]);  
+ //     console.log( drawnItemsJson.features[0]);  
       
       drawnPoly = L.geoJson(drawnItemsJson);  
       poly.disable();    
@@ -1868,7 +1867,7 @@ function clearDrawnItems() {
     }  
        
       function findIfInside(){  
-	  console.log('inside findIfInside');
+//	  console.log('inside findIfInside');
 	  
       var loadEmAll = encodeURI("https://restoringtrenton.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT the_geom , taxes, totalassmt, city_liens, priv_liens FROM trenton_master");
 	  
@@ -1892,13 +1891,13 @@ function clearDrawnItems() {
             var inside = turf.inside(centroid, drawnItemsJson.features[0]);  
             
               if (turf.inside(turf.centroid(feature), drawnItemsJson.features[0])) { 
-			  console.log("in!");
+//			  console.log("in!");
               //pull the class 2 residential props out and treat them separately -- update if other classes need to be removed
                 allPropStats.count ++;
                 allPropStats.value += parseInt(feature.properties.totalassmt);  
                 allPropStats.taxes += feature.properties.taxes;
               if (feature.properties.class=='2') {
-                console.log("class 2");
+//                console.log("class 2");
                 class2Stats.count ++;  
                 class2Stats.value += parseInt(feature.properties.totalassmt);  
                 class2Stats.taxes += feature.properties.taxes; 
@@ -1907,7 +1906,7 @@ function clearDrawnItems() {
                 
               //everything else is in principle taxable...
               else { 
-              console.log("not class 2");
+//              console.log("not class 2");
                     taxableStats.count ++; 
                     taxableStats.value += parseInt(feature.properties.totalassmt);  
                     taxableStats.taxes += feature.properties.taxes;  
@@ -2018,7 +2017,7 @@ function clearDrawnItems() {
           document.querySelector('#expCollDisplay').value = expColl;   
           document.querySelector('#annualBudget').value = totalRev;  
           
-          console.log(model, city, county, state_cash, other_cash);
+ //         console.log(model, city, county, state_cash, other_cash);
         
         } 
 
